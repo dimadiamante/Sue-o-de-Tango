@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 
 // Sueño de Tango — Variant 6 (compact, fixed)
-// EN default, RO supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
+// RO default, EN supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
 // Fonts: Cormorant Garamond (brand) + Lato (text)
 // HERO uses background video with poster; safe fallback to image if video fails
 
@@ -188,7 +188,7 @@ function runSanityChecks(){
 export default function SuenoDeTangoLanding(){
   const [menuOpen,setMenuOpen]=useState(false);
   const [lightboxIndex,setLightboxIndex]=useState<number|null>(null);
-  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'en'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro'] as Locale[]).includes(s))?s:'en'});
+  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro'] as Locale[]).includes(s))?s:'ro'});
   const t=I18N[locale];
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
