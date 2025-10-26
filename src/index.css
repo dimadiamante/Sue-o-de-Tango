@@ -1,3 +1,7 @@
-/* Можно оставить пустым, наш компонент содержит свои стили */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ваши базовые штрихи можно оставить ниже */
 html,body,#root { height: 100%; }
 body { margin: 0; background: #0a0a0a; }
