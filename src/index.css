@@ -1,0 +1,3 @@
+/* Можно оставить пустым, наш компонент содержит свои стили */
+html,body,#root { height: 100%; }
+body { margin: 0; background: #0a0a0a; }
