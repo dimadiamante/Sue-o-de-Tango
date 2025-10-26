@@ -229,6 +229,7 @@ function runSanityChecks(){
 export default function SuenoDeTangoLanding(){
   const [menuOpen,setMenuOpen]=useState(false);
   const [lightboxIndex,setLightboxIndex]=useState<number|null>(null);
+  const [fitMode,setFitMode]=useState<'contain'|'cover'>('contain');
   const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru'] as Locale[]).includes(s))?s:'ro'});
   const t=I18N[locale];
   const todayIndex=new Date().getDay();
@@ -267,7 +268,7 @@ export default function SuenoDeTangoLanding(){
   const nextImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] next'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,1))},[lightboxIndex]);
 
   useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
-  useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(lightboxIndex===null)return; if(e.key==='Escape')closeLightbox(); if(e.key==='ArrowLeft')prevImage(); if(e.key==='ArrowRight')nextImage()}; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey)},[lightboxIndex,closeLightbox,prevImage,nextImage]);
+  useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(lightboxIndex===null)return; if(e.key==='Escape')closeLightbox(); if(e.key==='ArrowLeft')prevImage(); if(e.key==='ArrowRight')nextImage(); if(e.key==='f'||e.key==='F') setFitMode(m=>m==='contain'?'cover':'contain')}; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey)},[lightboxIndex,closeLightbox,prevImage,nextImage]);
 
   const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; console.log('[Form] submit', obj); const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}
 Phone: ${obj.phone||''}
@@ -479,7 +480,28 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
           <button aria-label={t.lightbox.next} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10" onClick={nextImage}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 6l6 6-6 6"/></svg>
           </button>
-          <div className="max-h-[85vh] max-w-5xl"><img src={IMAGES[lightboxIndex].src} alt={IMAGES[lightboxIndex].alt[locale]} className="h-full w-full rounded-2xl object-contain shadow-2xl ring-1 ring-white/10"/><p className="mt-3 text-center text-sm text-neutral-300">{IMAGES[lightboxIndex].alt[locale]}</p></div>
+          <div className="w-[min(96vw,1600px)]" style={{maxHeight:'92vh'}}>
+            <img
+              src={IMAGES[lightboxIndex].src}
+              alt={IMAGES[lightboxIndex].alt[locale]}
+              className={
+                "h-full w-full rounded-2xl shadow-2xl ring-1 ring-white/10 " +
+                (fitMode==='cover' ? 'object-cover' : 'object-contain')
+              }
+              style={{maxHeight:'92vh', maxWidth:'min(96vw,1600px)'}}
+              onLoad={(e)=>{
+                const img=e.currentTarget;
+                const vw=Math.min(window.innerWidth,1600);
+                const vh=window.innerHeight*0.92;
+                const vp=vw/vh;
+                const ar=img.naturalWidth/img.naturalHeight;
+                const mode = (Math.abs(ar - vp)/vp) <= 0.12 ? 'cover' : 'contain';
+                setFitMode(mode);
+              }}
+              onDoubleClick={()=> setFitMode(m=>m==='contain'?'cover':'contain')}
+            />
+            <p className="mt-3 text-center text-sm text-neutral-300">{IMAGES[lightboxIndex].alt[locale]}</p>
+          </div>
         </div>
       )}
 
