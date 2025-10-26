@@ -9,7 +9,7 @@ import React, { useEffect, useState, useCallback } from "react";
 // Types & locales
 // -----------------------------
 
-type Locale = 'en' | 'ro';
+type Locale = 'en' | 'ro' | 'ru';
 
 type TitleKey = 'basicCourse'|'musicalityImprovisation'|'techniqueAxisPivots'|'partnerWorkAbrazo'|'tangoVals'|'practicaMilonga'|'intensiveVals'|'bootcampFromScratch';
 
@@ -19,7 +19,8 @@ type RoomKey = 'roomA'|'roomB'|'mainHall';
 
 const DAYS: Record<Locale,string[]> = {
   en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
-  ro:['Du','Lu','Ma','Mi','Jo','Vi','Sâ']
+  ro:['Du','Lu','Ma','Mi','Jo','Vi','Sâ'],
+  ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']
 };
 
 const I18N = {
@@ -82,6 +83,36 @@ const I18N = {
       alert:'Mulțumim! Te contactăm în curând.'
     },
     lightbox:{close:'Închide',prev:'Anterior',next:'Următor'}
+  },
+  ru:{
+    siteTitle:'Sueño de Tango',
+    nav:{gallery:'Галерея',schedule:'Расписание',about:'О школе',join:'Присоединиться',contact:'Записаться'},
+    hero:{
+      title:'Sueño de Tango', slogan:'El arte del encuentro',
+      subtitle:'Sueño de Tango — это пространство, где танго становится способом чувствовать, а не просто двигаться. Здесь важны контакт, дыхание, тишина между шагами, а техника — лишь средство выразить внутреннее. Это не просто школа — это атмосфера встречи, мечты и глубины.',
+      ctaTrial:'Записаться на пробное занятие', ctaGallery:'Смотреть галерею'
+    },
+    gallery:{title:'Галерея',intro:'Контраст света, живые паузы и дыхание танца. Нажмите на фото, чтобы открыть полноэкранный режим.'},
+    schedule:{
+      title:'Расписание', intro:'Выберите день недели, чтобы увидеть занятия и события.', note:'* Расписание может меняться. Пожалуйста, уточняйте перед визитом.', cta:'Спросить / Записаться',
+      titles:{
+        basicCourse:'Базовый курс', musicalityImprovisation:'Музыкальность и импровизация', techniqueAxisPivots:'Техника: ось и пивоты', partnerWorkAbrazo:'Работа в паре: абразо', tangoVals:'Танго‑Вальс', practicaMilonga:'Практика / милонга', intensiveVals:'Интенсив: вальс', bootcampFromScratch:'Буткемп с нуля'
+      },
+      levels:{beginners:'Новички',improvers:'Продолжающие',allLevels:'Все уровни',mixedBegImp:'Новички/Продолжающие',intermediatePlus:'Средний+',open:'Открыто'},
+      rooms:{roomA:'Зал A',roomB:'Зал B',mainHall:'Большой зал'}
+    },
+    about:{
+      title:'О школе', p1:'Мы обучаем аутентичному аргентинскому танго: от первых шагов до тонких нюансов импровизации.', p2:'Мы уделяем внимание музыкальности, оси, качеству абразо и культуре танцпола.',
+      bullets:['Группы для всех уровней','Регулярные практики и милонги','Индивидуальные занятия и интенсивы'],
+      whyTitle:'Почему «Sueño de Tango»', whyText:'Наша визуальная философия — это контраст света и тени, где каждая пауза и поворот читаются как кадр фильма. Мы строим танец как диалог и приглашаем вас в эту историю.', join:'Присоединиться', ask:'Задать вопрос'
+    },
+    cta:{title:'Готовы сделать первый шаг?',text:'Запишитесь на пробный урок — подберём комфортный уровень и партнёрство.',btn:'Записаться'},
+    contact:{
+      title:'Контакты',intro:'Мы в центре города. Напишите нам или оставьте заявку.', addressLabel:'Адрес',address:'ул. Студийная, 10', phoneLabel:'Телефон', instagram:'Instagram',
+      form:{title:'Отправить заявку',name:'Имя',phone:'Телефон',email:'Email',level:'Уровень',levels:['Новички','Продолжающие','Средний / Продвинутый','Индивидуальные занятия'],message:'Сообщение',messagePh:'Задайте вопрос или укажите удобное время',submit:'Отправить',consent:'Отправляя форму, вы соглашаетесь на обработку данных.'},
+      alert:'Спасибо! Мы свяжемся с вами в ближайшее время.'
+    },
+    lightbox:{close:'Закрыть',prev:'Назад',next:'Вперёд'}
   }
 } as const;
 
@@ -111,9 +142,10 @@ const GALLERY_FILES = ['gallery-01.webp','gallery-02.webp','gallery-03.webp','ga
 const IMG_SRC = GALLERY_FILES.map(f => BASE_URL + 'images/' + f);
 const ALT = {
   en:['Silhouette couple in dramatic light','Close‑up tango steps','Abrazo in backlight','Pivot with torso twist','Couple on an empty stage','Dancers’ shoes details'],
-  ro:['Siluetă de cuplu în lumină dramatică','Prim‑plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte']
+  ro:['Siluetă de cuplu în lumină dramatică','Prim‑plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte'],
+  ru:['Силуэт пары в драматичном свете','Крупный план шагов танго','Абразо на контровом свете','Пивот с разворотом корпуса','Пара на пустой сцене','Детали танцевальной обуви']
 };
-const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i]}}));
+const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i]}}));
 
 // -----------------------------
 // Schedule (Monday‑first UI)
@@ -168,10 +200,10 @@ function runSanityChecks(){
 
   end=group('CTA srcset sanity'); const ok=['800w','1200w','1600w','2000w'].every(k=>CTA_BG_SRCSET.includes(k)); !ok?console.error('[SANITY] CTA_BG_SRCSET missing sizes'):console.log('[SANITY] OK'); end();
 
-  end=group('Schedule title keys parity (EN vs RO)'); const enK=Object.keys(I18N.en.schedule.titles).sort(), roK=Object.keys(I18N.ro.schedule.titles).sort(); (enK.length!==roK.length||!enK.every((k,i)=>k===roK[i]))?console.error('[SANITY] schedule.titles mismatch',{enK,roK}):console.log('[SANITY] OK'); end();
+  end=group('Schedule title keys parity across locales'); const base=Object.keys(I18N.en.schedule.titles).sort(); const diffs=(Object.keys(I18N) as Locale[]).map(Lc=>{const k=Object.keys(I18N[Lc].schedule.titles).sort(); return {Lc, ok:k.length===base.length && k.every((v,i)=>v===base[i])};}).filter(x=>!x.ok); diffs.length?console.error('[SANITY] schedule.titles mismatch',diffs):console.log('[SANITY] OK'); end();
 
   // TC15: Gallery ALT length matches IMG_SRC for all locales
-  end=group('ALT length matches IMG_SRC'); const eqLen = ALT.en.length===IMG_SRC.length && ALT.ro.length===IMG_SRC.length; !eqLen?console.error('[SANITY] ALT arrays length mismatch',{en:ALT.en.length,ro:ALT.ro.length,src:IMG_SRC.length}):console.log('[SANITY] OK'); end();
+  end=group('ALT length matches IMG_SRC'); const eqLen = ALT.en.length===IMG_SRC.length && ALT.ro.length===IMG_SRC.length && ALT.ru.length===IMG_SRC.length;
 
   // TC16: HERO constants are defined and non-empty
   end=group('HERO constants defined'); const okHero = [HERO_BANNER_RAW,HERO_BANNER,FALLBACK_HERO].every(v=>typeof v==='string' && v.length>0); !okHero?console.error('[SANITY] HERO consts missing') : console.log('[SANITY] OK'); end();
@@ -188,7 +220,7 @@ function runSanityChecks(){
 export default function SuenoDeTangoLanding(){
   const [menuOpen,setMenuOpen]=useState(false);
   const [lightboxIndex,setLightboxIndex]=useState<number|null>(null);
-  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro'] as Locale[]).includes(s))?s:'ro'});
+  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru'] as Locale[]).includes(s))?s:'ro'});
   const t=I18N[locale];
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
@@ -255,7 +287,7 @@ export default function SuenoDeTangoLanding(){
           </nav>
           <div className="flex items-center gap-2">
             <select aria-label="Language selector" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
-              <option value="en">EN</option><option value="ro">RO</option>
+              <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option>
             </select>
             <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10" onClick={()=>{console.log('[UI] menu toggle'); setMenuOpen(s=>!s)}}>
               <span className="sr-only">Menu</span>
@@ -267,7 +299,7 @@ export default function SuenoDeTangoLanding(){
           <div className="border-t border-white/10 md:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3" onClick={()=>setMenuOpen(false)}>
               <div className="mb-2"><label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
-                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option></select>
+                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option></select>
               </div>
               <a className="py-2" href="#gallery">{t.nav.gallery}</a>
               <a className="py-2" href="#schedule">{t.nav.schedule}</a>
