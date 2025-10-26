@@ -48,7 +48,7 @@ const I18N = {
     },
     cta:{title:'Ready for the first step?',text:'Book a trial lesson — we’ll find a comfortable level and partnership.',btn:'Enroll'},
     contact:{
-      title:'Contact',intro:'We are in the city center. Message us or leave a request.', addressLabel:'Address',address:'Your Studio St., 10', phoneLabel:'Phone', instagram:'Instagram',
+      title:'Contact',intro:'We are in the city center. Message us or leave a request.', addressLabel:'Address',address:'Your Studio St., 10', phoneLabel:'Phone', instagram:'Instagram', emailLabel:'Email',
       form:{title:'Send a request',name:'Name',phone:'Phone',email:'Email',level:'Level',levels:['Beginners','Improvers','Intermediate / Advanced','Private Lessons'],message:'Message',messagePh:'Ask a question or tell us the time that suits you',submit:'Send',consent:'By sending, you agree to data processing.'},
       alert:'Thank you! We will contact you soon.'
     },
@@ -78,7 +78,7 @@ const I18N = {
     },
     cta:{title:'Pregătit pentru primul pas?',text:'Programează o lecție de probă — găsim nivelul și parteneriatul potrivit.',btn:'Înscrie-te'},
     contact:{
-      title:'Contact',intro:'Suntem în centrul orașului. Scrie-ne pe rețele sau lasă o cerere.', addressLabel:'Adresă',address:'Str. Școala Ta, 10', phoneLabel:'Telefon', instagram:'Instagram',
+      title:'Contact',intro:'Suntem în centrul orașului. Scrie-ne pe rețele sau lasă o cerere.', addressLabel:'Adresă',address:'Str. Școala Ta, 10', phoneLabel:'Telefon', instagram:'Instagram', emailLabel:'Email',
       form:{title:'Trimite o cerere',name:'Nume',phone:'Telefon',email:'Email',level:'Nivel',levels:['Începători','Continuați','Intermediar / Avansat','Lecții private'],message:'Mesaj',messagePh:'Întreabă ceva sau spune-ne ora preferată',submit:'Trimite',consent:'Prin trimitere, ești de acord cu prelucrarea datelor.'},
       alert:'Mulțumim! Te contactăm în curând.'
     },
@@ -108,7 +108,7 @@ const I18N = {
     },
     cta:{title:'Готовы сделать первый шаг?',text:'Запишитесь на пробный урок — подберём комфортный уровень и партнёрство.',btn:'Записаться'},
     contact:{
-      title:'Контакты',intro:'Мы в центре города. Напишите нам или оставьте заявку.', addressLabel:'Адрес',address:'ул. Студийная, 10', phoneLabel:'Телефон', instagram:'Instagram',
+      title:'Контакты',intro:'Мы в центре города. Напишите нам или оставьте заявку.', addressLabel:'Адрес',address:'ул. Студийная, 10', phoneLabel:'Телефон', instagram:'Instagram', emailLabel:'Email',
       form:{title:'Отправить заявку',name:'Имя',phone:'Телефон',email:'Email',level:'Уровень',levels:['Новички','Продолжающие','Средний / Продвинутый','Индивидуальные занятия'],message:'Сообщение',messagePh:'Задайте вопрос или укажите удобное время',submit:'Отправить',consent:'Отправляя форму, вы соглашаетесь на обработку данных.'},
       alert:'Спасибо! Мы свяжемся с вами в ближайшее время.'
     },
@@ -133,6 +133,9 @@ const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
 const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.jpg 800w, ${BASE_URL}images/cta-bg-1200.jpg 1200w, ${BASE_URL}images/cta-bg-1600.jpg 1600w, ${BASE_URL}images/cta-bg-2000.jpg 2000w`;
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.jpg`;
 const CTA_BG_SIZES = '100vw';
+
+// Contact email for form submissions and mailto links
+const CONTACT_EMAIL = '7437976@gmail.com';
 
 // -----------------------------
 // Gallery
@@ -260,7 +263,11 @@ export default function SuenoDeTangoLanding(){
   useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
   useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(lightboxIndex===null)return; if(e.key==='Escape')closeLightbox(); if(e.key==='ArrowLeft')prevImage(); if(e.key==='ArrowRight')nextImage()}; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey)},[lightboxIndex,closeLightbox,prevImage,nextImage]);
 
-  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); console.log('Form submit:',Object.fromEntries(data.entries())); alert(t.contact.alert); f.reset()};
+  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; console.log('[Form] submit', obj); const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}
+Phone: ${obj.phone||''}
+Email: ${obj.email||''}
+Level: ${obj.level||''}
+Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600/40 font-text">
@@ -422,6 +429,7 @@ export default function SuenoDeTangoLanding(){
             <div className="mt-4 space-y-2 text-neutral-300">
               <p><strong>{t.contact.addressLabel}:</strong> {t.contact.address}</p>
               <p><strong>{t.contact.phoneLabel}:</strong> +40 (000) 000‑000</p>
+              <p><strong>{t.contact.emailLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
               <p><strong>{t.contact.instagram}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
             </div>
             <div className="mt-6 h-56 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800"><div className="flex h-full items-center justify-center text-neutral-400">Map</div></div>
