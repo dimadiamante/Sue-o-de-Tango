@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 
+// Sueño de Tango — Variant 6 (compact, fixed)
+// RO default, EN supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
+// Fonts: Cormorant Garamond (brand) + Lato (text)
+// HERO uses background video with poster; safe fallback to image if video fails
+
+// -----------------------------
+// Types & locales
+// -----------------------------
+
 type Locale = 'en' | 'ro' | 'ru';
 
 type TitleKey = 'basicCourse'|'musicalityImprovisation'|'techniqueAxisPivots'|'partnerWorkAbrazo'|'tangoVals'|'practicaMilonga'|'intensiveVals'|'bootcampFromScratch';
@@ -39,7 +48,7 @@ const I18N = {
     },
     cta:{title:'Ready for the first step?',text:'Book a trial lesson — we’ll find a comfortable level and partnership.',btn:'Enroll'},
     contact:{
-      title:'Contact',intro:'We are in the city center. Message us or leave a request.', addressLabel:'Address',address:'Your Studio St., 10', phoneLabel:'Phone', instagram:'Instagram', emailLabel:'Email',
+      title:'Contact',intro:'We are in the city center. Message us or leave a request.', addressLabel:'Address',address:'Strada Vlaicu Vodă 7, București', phoneLabel:'Phone', instagram:'Instagram', emailLabel:'Email',
       form:{title:'Send a request',name:'Name',phone:'Phone',email:'Email',level:'Level',levels:['Beginners','Improvers','Intermediate / Advanced','Private Lessons'],message:'Message',messagePh:'Ask a question or tell us the time that suits you',submit:'Send',consent:'By sending, you agree to data processing.'},
       alert:'Thank you! We will contact you soon.'
     },
@@ -69,7 +78,7 @@ const I18N = {
     },
     cta:{title:'Pregătit pentru primul pas?',text:'Programează o lecție de probă — găsim nivelul și parteneriatul potrivit.',btn:'Înscrie-te'},
     contact:{
-      title:'Contact',intro:'Suntem în centrul orașului. Scrie-ne pe rețele sau lasă o cerere.', addressLabel:'Adresă',address:'Str. Școala Ta, 10', phoneLabel:'Telefon', instagram:'Instagram', emailLabel:'Email',
+      title:'Contact',intro:'Suntem în centrul orașului. Scrie-ne pe rețele sau lasă o cerere.', addressLabel:'Adresă',address:'Strada Vlaicu Vodă 7, București', phoneLabel:'Telefon', instagram:'Instagram', emailLabel:'Email',
       form:{title:'Trimite o cerere',name:'Nume',phone:'Telefon',email:'Email',level:'Nivel',levels:['Începători','Continuați','Intermediar / Avansat','Lecții private'],message:'Mesaj',messagePh:'Întreabă ceva sau spune-ne ora preferată',submit:'Trimite',consent:'Prin trimitere, ești de acord cu prelucrarea datelor.'},
       alert:'Mulțumim! Te contactăm în curând.'
     },
@@ -99,7 +108,7 @@ const I18N = {
     },
     cta:{title:'Готовы сделать первый шаг?',text:'Запишитесь на пробный урок — подберём комфортный уровень и партнёрство.',btn:'Записаться'},
     contact:{
-      title:'Контакты',intro:'Мы в центре города. Напишите нам или оставьте заявку.', addressLabel:'Адрес',address:'ул. Студийная, 10', phoneLabel:'Телефон', instagram:'Instagram', emailLabel:'Email',
+      title:'Контакты',intro:'Мы в центре города. Напишите нам или оставьте заявку.', addressLabel:'Адрес',address:'Strada Vlaicu Vodă 7, București', phoneLabel:'Телефон', instagram:'Instagram', emailLabel:'Email',
       form:{title:'Отправить заявку',name:'Имя',phone:'Телефон',email:'Email',level:'Уровень',levels:['Новички','Продолжающие','Средний / Продвинутый','Индивидуальные занятия'],message:'Сообщение',messagePh:'Задайте вопрос или укажите удобное время',submit:'Отправить',consent:'Отправляя форму, вы соглашаетесь на обработку данных.'},
       alert:'Спасибо! Мы свяжемся с вами в ближайшее время.'
     },
@@ -426,9 +435,20 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
               <p><strong>{t.contact.emailLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
               <p><strong>{t.contact.instagram}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
             </div>
-            <a href={MAPS_URL} target="_blank" rel="noreferrer noopener" className="mt-6 block h-56 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800">
-              <div className="flex h-full items-center justify-center text-neutral-300 hover:text-red-400">Open in Google Maps</div>
-            </a>
+            <div className="mt-6 h-56 md:h-72 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800 shadow">
+              <iframe
+                title="Google Maps — Strada Vlaicu Vodă 7, București"
+                src={`https://www.google.com/maps?q=${encodeURIComponent(t.contact.address)}&z=16&output=embed`}
+                width="100%"
+                height="100%"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                style={{ border: 0, filter: 'grayscale(20%) contrast(110%) brightness(95%)' }}
+              />
+            </div>
+            <div className="mt-2 text-sm">
+              <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">Open in Google Maps</a>
+            </div>
           </div>
           <form onSubmit={handleSubmit} className="rounded-3xl border border-white/10 bg-neutral-900 p-6">
             <h3 className="text-xl font-semibold">{t.contact.form.title}</h3>
