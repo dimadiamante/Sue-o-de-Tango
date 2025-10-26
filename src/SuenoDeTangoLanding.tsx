@@ -139,6 +139,9 @@ const MAPS_URL = 'https://maps.app.goo.gl/Xe1dM73d6raCRfNU7';
 
 // Contact email for form submissions and mailto links
 const CONTACT_EMAIL = '7437976@gmail.com';
+// Contact phone
+const CONTACT_PHONE = '+40 749 901 534';
+const CONTACT_PHONE_TEL = '+40749901534';
 
 // -----------------------------
 // Gallery
@@ -431,7 +434,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
             <p className="mt-3 text-neutral-300">{t.contact.intro}</p>
             <div className="mt-4 space-y-2 text-neutral-300">
               <p><strong>{t.contact.addressLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">{t.contact.address}</a></p>
-              <p><strong>{t.contact.phoneLabel}:</strong> +40 (000) 000‑000</p>
+              <p><strong>{t.contact.phoneLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'tel:'+CONTACT_PHONE_TEL}>{CONTACT_PHONE}</a></p>
               <p><strong>{t.contact.emailLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
               <p><strong>{t.contact.instagram}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
             </div>
