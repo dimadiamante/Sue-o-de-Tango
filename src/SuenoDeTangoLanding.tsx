@@ -290,7 +290,9 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         .hz-sm:hover{transform:translateZ(0) scale(1.03)}
         .hz-md{transition:transform .35s cubic-bezier(.22,.61,.36,1);will-change:transform}
         .hz-md:hover{transform:translateZ(0) scale(1.06)}
-        @media (prefers-reduced-motion: reduce){.hz-sm,.hz-md{transition:none}.hz-sm:hover,.hz-md:hover{transform:none}}
+        .hz-nav{transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
+        .hz-nav:hover{transform:translateZ(0) scale(1.08)}
+        @media (prefers-reduced-motion: reduce){.hz-sm,.hz-md,.hz-nav{transition:none}.hz-sm:hover,.hz-md:hover,.hz-nav:hover{transform:none}}
       `}</style>
 
       {/* Header */}
@@ -298,10 +300,10 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <a href="#hero" className="font-brand text-xl tracking-wide inline-block hz-sm">{t.siteTitle}</a>
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
-            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#gallery">{t.nav.gallery}</a>
-            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#schedule">{t.nav.schedule}</a>
-            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#about">{t.nav.about}</a>
-            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#cta">{t.nav.join}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#about">{t.nav.about}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#cta">{t.nav.join}</a>
             <a className="rounded-full border border-red-600/60 px-4 py-1.5 text-sm hover:bg-red-600/20 hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
           </nav>
           <div className="flex items-center gap-2">
@@ -320,11 +322,11 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
               <div className="mb-2"><label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
                 <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option></select>
               </div>
-              <a className="py-2 inline-flex hz-sm transform-gpu" href="#gallery">{t.nav.gallery}</a>
-              <a className="py-2 inline-flex hz-sm transform-gpu" href="#schedule">{t.nav.schedule}</a>
-              <a className="py-2 inline-flex hz-sm transform-gpu" href="#about">{t.nav.about}</a>
-              <a className="py-2 inline-flex hz-sm transform-gpu" href="#cta">{t.nav.join}</a>
-              <a className="py-2 inline-flex hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
+              <a className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
+              <a className="py-2 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
+              <a className="py-2 inline-flex hz-nav transform-gpu" href="#about">{t.nav.about}</a>
+              <a className="py-2 inline-flex hz-nav transform-gpu" href="#cta">{t.nav.join}</a>
+              <a className="py-2 inline-flex hz-nav transform-gpu" href="#contact">{t.nav.contact}</a>
             </nav>
           </div>
         )}
