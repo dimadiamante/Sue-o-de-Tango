@@ -1,14 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-// Sueño de Tango — Variant 6 (compact, fixed)
-// RO default, EN supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
-// Fonts: Cormorant Garamond (brand) + Lato (text)
-// HERO uses background video with poster; safe fallback to image if video fails
-
-// -----------------------------
-// Types & locales
-// -----------------------------
-
 type Locale = 'en' | 'ro' | 'ru';
 
 type TitleKey = 'basicCourse'|'musicalityImprovisation'|'techniqueAxisPivots'|'partnerWorkAbrazo'|'tangoVals'|'practicaMilonga'|'intensiveVals'|'bootcampFromScratch';
@@ -133,6 +124,9 @@ const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
 const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.jpg 800w, ${BASE_URL}images/cta-bg-1200.jpg 1200w, ${BASE_URL}images/cta-bg-1600.jpg 1600w, ${BASE_URL}images/cta-bg-2000.jpg 2000w`;
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.jpg`;
 const CTA_BG_SIZES = '100vw';
+
+// Google Maps location
+const MAPS_URL = 'https://maps.app.goo.gl/Xe1dM73d6raCRfNU7';
 
 // Contact email for form submissions and mailto links
 const CONTACT_EMAIL = '7437976@gmail.com';
@@ -427,12 +421,14 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
             <h2 className="font-brand text-3xl md:text-4xl">{t.contact.title}</h2>
             <p className="mt-3 text-neutral-300">{t.contact.intro}</p>
             <div className="mt-4 space-y-2 text-neutral-300">
-              <p><strong>{t.contact.addressLabel}:</strong> {t.contact.address}</p>
+              <p><strong>{t.contact.addressLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">{t.contact.address}</a></p>
               <p><strong>{t.contact.phoneLabel}:</strong> +40 (000) 000‑000</p>
               <p><strong>{t.contact.emailLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
               <p><strong>{t.contact.instagram}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
             </div>
-            <div className="mt-6 h-56 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800"><div className="flex h-full items-center justify-center text-neutral-400">Map</div></div>
+            <a href={MAPS_URL} target="_blank" rel="noreferrer noopener" className="mt-6 block h-56 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800">
+              <div className="flex h-full items-center justify-center text-neutral-300 hover:text-red-400">Open in Google Maps</div>
+            </a>
           </div>
           <form onSubmit={handleSubmit} className="rounded-3xl border border-white/10 bg-neutral-900 p-6">
             <h3 className="text-xl font-semibold">{t.contact.form.title}</h3>
