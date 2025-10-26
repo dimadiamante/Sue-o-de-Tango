@@ -284,7 +284,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         :root{--font-brand:'Cormorant Garamond',serif;--font-text:'Lato',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji'}
         .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
         .hero-title{color:#6a0f1a !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 18px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-        .hero-slogan{color:#000 !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.95),0 0 16px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+        .hero-slogan{color:#000 !important;text-shadow:0 0 1px rgba(255,255,255,1),0 0 4px rgba(255,255,255,1),0 0 10px rgba(255,255,255,.98),0 0 20px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
       `}</style>
 
       {/* Header */}
