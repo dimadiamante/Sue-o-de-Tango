@@ -390,7 +390,7 @@ export default function SuenoDeTangoLanding(){
             <div className="mt-4 space-y-2 text-neutral-300">
               <p><strong>{t.contact.addressLabel}:</strong> {t.contact.address}</p>
               <p><strong>{t.contact.phoneLabel}:</strong> +40 (000) 000‑000</p>
-              <p><strong>{t.contact.instagram}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="#">@tango.in.frames</a></p>
+              <p><strong>{t.contact.instagram}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
             </div>
             <div className="mt-6 h-56 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800"><div className="flex h-full items-center justify-center text-neutral-400">Map</div></div>
           </div>
@@ -429,13 +429,13 @@ export default function SuenoDeTangoLanding(){
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 md:flex-row">
           <p className="text-sm text-neutral-400">© {new Date().getFullYear()} {t.siteTitle}</p>
           <div className="flex items-center gap-4 text-neutral-300">
-            <a href="#" className="hover:text-red-400" aria-label="Instagram">
+            <a href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" className="hover:text-red-400" aria-label="Instagram" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/></svg>
             </a>
-            <a href="#" className="hover:text-red-400" aria-label="Facebook">
+            <a href="https://www.facebook.com/dimon.yachmen" className="hover:text-red-400" aria-label="Facebook" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
             </a>
-            <a href="#" className="hover:text-red-400" aria-label="YouTube">
+            <a href="https://www.youtube.com/@dimadiamante" className="hover:text-red-400" aria-label="YouTube" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 3.8 12 3.8 12 3.8s-6.88 0-8.59.62a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 2C5.12 20.2 12 20.2 12 20.2s6.88 0 8.59-.62a2.78 2.78 0 0 0 1.95-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><path d="M9.75 15.02 15.5 12 9.75 8.98v6.04z"/></svg>
             </a>
           </div>
