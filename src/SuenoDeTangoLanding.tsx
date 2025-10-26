@@ -286,9 +286,10 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
         .hero-title{color:#6a0f1a !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 18px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
         .hero-slogan{color:#000 !important;text-shadow:0 0 0.5px rgba(255,255,255,1),0 0 3px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 14px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-webkit-text-stroke:0.4px #000}
-        .glow-breath{animation:glowBreath 3.2s ease-in-out infinite;will-change:text-shadow}
-        @keyframes glowBreath{0%,100%{text-shadow:0 0 1px rgba(255,255,255,.9),0 0 6px rgba(255,255,255,.9),0 0 14px rgba(255,255,255,.85)}50%{text-shadow:0 0 3px rgba(255,255,255,1),0 0 12px rgba(255,255,255,1),0 0 24px rgba(255,255,255,.95)}}
-        @media (prefers-reduced-motion: reduce){.glow-breath{animation:none}}
+        .glow-breath{animation:glowBreath 2.6s ease-in-out infinite,glowFilter 2.6s ease-in-out infinite;will-change:text-shadow,filter}
+        @keyframes glowBreath{0%,100%{text-shadow:0 0 2px rgba(255,255,255,1),0 0 10px rgba(255,255,255,1),0 0 24px rgba(255,255,255,.95),0 0 40px rgba(255,255,255,.9)}50%{text-shadow:0 0 3px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 36px rgba(255,255,255,1),0 0 56px rgba(255,255,255,.95)}}
+        @keyframes glowFilter{0%,100%{filter:drop-shadow(0 0 8px rgba(255,255,255,.6)) drop-shadow(0 0 20px rgba(255,255,255,.45))}50%{filter:drop-shadow(0 0 14px rgba(255,255,255,.95)) drop-shadow(0 0 36px rgba(255,255,255,.7))}}
+        @media (prefers-reduced-motion: reduce){.glow-breath{animation:none;filter:none}}
         /* Title entrance + staggered lines */
         .hero-anim{animation:titleEnter .7s cubic-bezier(.22,.61,.36,1) both;will-change:opacity,transform}
         .hero-line{display:block}
