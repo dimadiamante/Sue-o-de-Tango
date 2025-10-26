@@ -298,10 +298,10 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <a href="#hero" className="font-brand text-xl tracking-wide inline-block hz-sm">{t.siteTitle}</a>
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
-            <a className="hover:text-red-400/90" href="#gallery">{t.nav.gallery}</a>
-            <a className="hover:text-red-400/90" href="#schedule">{t.nav.schedule}</a>
-            <a className="hover:text-red-400/90" href="#about">{t.nav.about}</a>
-            <a className="hover:text-red-400/90" href="#cta">{t.nav.join}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#gallery">{t.nav.gallery}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#schedule">{t.nav.schedule}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#about">{t.nav.about}</a>
+            <a className="hover:text-red-400/90 inline-flex hz-sm transform-gpu" href="#cta">{t.nav.join}</a>
             <a className="rounded-full border border-red-600/60 px-4 py-1.5 text-sm hover:bg-red-600/20 hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
           </nav>
           <div className="flex items-center gap-2">
@@ -320,11 +320,11 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
               <div className="mb-2"><label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
                 <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option></select>
               </div>
-              <a className="py-2" href="#gallery">{t.nav.gallery}</a>
-              <a className="py-2" href="#schedule">{t.nav.schedule}</a>
-              <a className="py-2" href="#about">{t.nav.about}</a>
-              <a className="py-2" href="#cta">{t.nav.join}</a>
-              <a className="py-2" href="#contact">{t.nav.contact}</a>
+              <a className="py-2 inline-flex hz-sm transform-gpu" href="#gallery">{t.nav.gallery}</a>
+              <a className="py-2 inline-flex hz-sm transform-gpu" href="#schedule">{t.nav.schedule}</a>
+              <a className="py-2 inline-flex hz-sm transform-gpu" href="#about">{t.nav.about}</a>
+              <a className="py-2 inline-flex hz-sm transform-gpu" href="#cta">{t.nav.join}</a>
+              <a className="py-2 inline-flex hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
             </nav>
           </div>
         )}
