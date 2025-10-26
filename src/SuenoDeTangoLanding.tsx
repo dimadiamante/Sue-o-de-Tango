@@ -95,31 +95,20 @@ const BASE_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env
 // Poster image already provided
 const HERO_BANNER_RAW = BASE_URL + "images/my-hero.webp";
 const HERO_BANNER = encodeURI(HERO_BANNER_RAW);
-const FALLBACK_HERO = "https://images.unsplash.com/photo-1519681393784-d120267933ba";
+const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
 
 // Video sources (local first, then optional CDN). If none work, we fall back to image silently.
-const HERO_VIDEO_SOURCES: Array<{src:string; type:string}> = [
-  { src: BASE_URL + "images/my-hero.mp4", type: "video/mp4" },
-  // Example CDN fallback (replace with your own if needed):
-  { src: "https://videos.pexels.com/video-files/853889/853889-uhd_2560_1440_25fps.mp4", type: "video/mp4" }
-];
 
-const CTA_BG_BASE = 'https://images.unsplash.com/photo-1519681393784-d120267933ba';
-const CTA_BG_SRCSET = `${CTA_BG_BASE}?q=80&w=800&auto=format&fit=crop 800w, ${CTA_BG_BASE}?q=80&w=1200&auto=format&fit=crop 1200w, ${CTA_BG_BASE}?q=80&w=1600&auto=format&fit=crop 1600w, ${CTA_BG_BASE}?q=80&w=2000&auto=format&fit=crop 2000w`;
+const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.jpg 800w, ${BASE_URL}images/cta-bg-1200.jpg 1200w, ${BASE_URL}images/cta-bg-1600.jpg 1600w, ${BASE_URL}images/cta-bg-2000.jpg 2000w`;
+const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.jpg`;
 const CTA_BG_SIZES = '100vw';
 
 // -----------------------------
 // Gallery
 // -----------------------------
 
-const IMG_SRC = [
-  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1541534401786-2077eed87a4b?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1537633552985-df8429e8048b?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1520975776262-9b8d0e67a93c?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop',
-];
+const GALLERY_FILES = ['gallery-01.webp','gallery-02.webp','gallery-03.webp','gallery-04.webp','gallery-05.webp','gallery-06.webp'];
+const IMG_SRC = GALLERY_FILES.map(f => BASE_URL + 'images/' + f);
 const ALT = {
   en:['Silhouette couple in dramatic light','Close‑up tango steps','Abrazo in backlight','Pivot with torso twist','Couple on an empty stage','Dancers’ shoes details'],
   ro:['Siluetă de cuplu în lumină dramatică','Prim‑plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte']
@@ -165,7 +154,7 @@ function runSanityChecks(){
 
   end=group('WEEK_ORDER Monday‑first'); const isPerm=WEEK_ORDER.slice().sort().every((v,i)=>v===i); !(WEEK_ORDER[0]===1&&WEEK_ORDER[6]===0&&isPerm)?console.error('[SANITY] WEEK_ORDER invalid',WEEK_ORDER):console.log('[SANITY] OK: Monday‑first'); end();
 
-  end=group('IMAGES src & locale keys'); const badSrc=IMAGES.filter(img=>!/^https?:\/\//.test(img.src)); const badLocaleKeys: Array<{idx:number;missing:string[]}> = []; IMAGES.forEach((img,i)=>{const m:string[]=[]; LOCALES.forEach(k=>{if(!(k in img.alt))m.push(k)}); if(m.length)badLocaleKeys.push({idx:i,missing:m})}); (badSrc.length||badLocaleKeys.length)?console.error('[SANITY] Images problems',{badSrc,badLocaleKeys}):console.log('[SANITY] OK'); end();
+  end=group('IMAGES src & locale keys'); const badSrc=IMAGES.filter(img=>!img.src.startsWith(BASE_URL)); const badLocaleKeys: Array<{idx:number;missing:string[]}> = []; IMAGES.forEach((img,i)=>{const m:string[]=[]; LOCALES.forEach(k=>{if(!(k in img.alt))m.push(k)}); if(m.length)badLocaleKeys.push({idx:i,missing:m})}); (badSrc.length||badLocaleKeys.length)?console.error('[SANITY] Images problems',{badSrc,badLocaleKeys}):console.log('[SANITY] OK'); end();
 
   end=group('Brand consistency across locales'); const titles=LOCALES.map(l=>(I18N as any)[l].hero.title), slogans=LOCALES.map(l=>(I18N as any)[l].hero.slogan); !(titles.every(t=>t===titles[0])&&slogans.every(s=>s===slogans[0]))?console.error('[SANITY] Brand mismatch',{titles,slogans}):console.log('[SANITY] OK'); end();
 
@@ -188,10 +177,8 @@ function runSanityChecks(){
   end=group('HERO constants defined'); const okHero = [HERO_BANNER_RAW,HERO_BANNER,FALLBACK_HERO].every(v=>typeof v==='string' && v.length>0); !okHero?console.error('[SANITY] HERO consts missing') : console.log('[SANITY] OK'); end();
 
   // TC17: Video sources sanity — strings with types
-  end=group('HERO video sources'); const badVid = HERO_VIDEO_SOURCES.filter(s=>!(s && typeof s.src==='string' && s.src.length>0 && typeof s.type==='string')); badVid.length?console.warn('[SANITY] Bad HERO video sources', badVid):console.log('[SANITY] OK'); end();
-
-  // TC18: BASE_URL applied to local assets
-  end=group('BASE_URL applied'); const okBase = HERO_BANNER_RAW.startsWith(BASE_URL) && HERO_VIDEO_SOURCES[0].src.startsWith(BASE_URL); !okBase?console.error('[SANITY] BASE_URL not applied',{BASE_URL,HERO_BANNER_RAW,video: HERO_VIDEO_SOURCES[0].src}):console.log('[SANITY] OK'); end();
+  // TC18: BASE_URL applied to banner
+  end=group('BASE_URL applied'); const okBase = HERO_BANNER_RAW.startsWith(BASE_URL); !okBase?console.error('[SANITY] BASE_URL not applied',{BASE_URL,HERO_BANNER_RAW}):console.log('[SANITY] OK'); end();
 }
 
 // -----------------------------
@@ -206,10 +193,7 @@ export default function SuenoDeTangoLanding(){
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
 
-  // HERO video state
-  const [videoFailed,setVideoFailed]=useState(false);
-  const [videoPlaying,setVideoPlaying]=useState(false);
-
+      
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{
     const links: HTMLLinkElement[] = [];
@@ -298,29 +282,13 @@ export default function SuenoDeTangoLanding(){
       {/* Hero */}
       <section id="hero" className="relative isolate">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          {!videoFailed ? (
-            <video
-              className="h-full w-full object-cover opacity-70"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              poster={HERO_BANNER}
-              onPlay={()=>{setVideoPlaying(true); console.log('[HERO] video playing')}}
-              onError={(e)=>{console.warn('[HERO] video failed, fallback to image'); setVideoFailed(true)}}
-            >
-              {HERO_VIDEO_SOURCES.map((s,i)=>(<source key={i} src={s.src} type={s.type}/>))}
-            </video>
-          ) : (
-            <img
-              src={HERO_BANNER}
-              alt={IMAGES[0].alt[locale]}
-              className="h-full w-full object-cover opacity-70"
-              loading="eager"
-              onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
-            />
-          )}
+          <img
+            src={HERO_BANNER}
+            alt={IMAGES[0].alt[locale]}
+            className="h-full w-full object-cover opacity-70"
+            loading="eager"
+            onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
@@ -405,7 +373,7 @@ export default function SuenoDeTangoLanding(){
       <section id="cta" className="relative mx-4 my-16 overflow-hidden rounded-3xl">
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-r from-red-900/50 via-neutral-900 to-black"/>
-          <img src={`${CTA_BG_BASE}?q=80&w=1800&auto=format&fit=crop`} srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES} alt={IMAGES[5].alt[locale]} className="h-full w-full object-cover opacity-25" loading="lazy"/>
+          <img src={CTA_BG_DEFAULT} srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES} alt={IMAGES[5].alt[locale]} className="h-full w-full object-cover opacity-25" loading="lazy"/>
         </div>
         <div className="mx-auto flex max-w-7xl flex-col items-start gap-4 px-6 py-12 md:flex-row md:items-center md:justify-between md:py-14">
           <div><h3 className="font-brand text-2xl md:text-3xl">{t.cta.title}</h3><p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p></div>
