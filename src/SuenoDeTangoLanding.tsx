@@ -286,6 +286,14 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
         .hero-title{color:#6a0f1a !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 18px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
         .hero-slogan{color:#000 !important;text-shadow:0 0 0.5px rgba(255,255,255,1),0 0 3px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 14px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-webkit-text-stroke:0.4px #000}
+        /* Title entrance + staggered lines */
+        .hero-anim{animation:titleEnter .7s cubic-bezier(.22,.61,.36,1) both;will-change:opacity,transform}
+        .hero-line{display:block}
+        .hero-line1{animation:lineRise .8s .05s cubic-bezier(.22,.61,.36,1) both}
+        .hero-line2{animation:lineRise .8s .15s cubic-bezier(.22,.61,.36,1) both}
+        @keyframes titleEnter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+        @keyframes lineRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        @media (prefers-reduced-motion: reduce){.hero-anim,.hero-line1,.hero-line2{animation:none}}
         .hz-sm{transition:transform .25s cubic-bezier(.22,.61,.36,1);will-change:transform}
         .hz-sm:hover{transform:translateZ(0) scale(1.03)}
         .hz-md{transition:transform .35s cubic-bezier(.22,.61,.36,1);will-change:transform}
@@ -345,9 +353,9 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
-          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left">
-            <span className="block">Sueño</span>
-            <span className="block">de Tango</span>
+          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim">
+            <span className="hero-line hero-line1">Sueño</span>
+            <span className="hero-line hero-line2">de Tango</span>
           </h1>
           <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left">{t.hero.slogan}</p>
           <p className="max-w-xl text-neutral-300 md:text-lg">{t.hero.subtitle}</p>
