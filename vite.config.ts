@@ -1,1 +1,0 @@
-base: '/Sueno-de-Tango/',
