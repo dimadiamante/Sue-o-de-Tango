@@ -286,6 +286,9 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
         .hero-title{color:#6a0f1a !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 18px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
         .hero-slogan{color:#000 !important;text-shadow:0 0 0.5px rgba(255,255,255,1),0 0 3px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 14px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-webkit-text-stroke:0.4px #000}
+        .glow-breath{animation:glowBreath 3.2s ease-in-out infinite;will-change:text-shadow}
+        @keyframes glowBreath{0%,100%{text-shadow:0 0 1px rgba(255,255,255,.9),0 0 6px rgba(255,255,255,.9),0 0 14px rgba(255,255,255,.85)}50%{text-shadow:0 0 3px rgba(255,255,255,1),0 0 12px rgba(255,255,255,1),0 0 24px rgba(255,255,255,.95)}}
+        @media (prefers-reduced-motion: reduce){.glow-breath{animation:none}}
         /* Title entrance + staggered lines */
         .hero-anim{animation:titleEnter .7s cubic-bezier(.22,.61,.36,1) both;will-change:opacity,transform}
         .hero-line{display:block}
@@ -353,11 +356,11 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
-          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim">
+          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim glow-breath">
             <span className="hero-line hero-line1">Sueño</span>
             <span className="hero-line hero-line2">de Tango</span>
           </h1>
-          <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left">{t.hero.slogan}</p>
+          <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left glow-breath">{t.hero.slogan}</p>
           <p className="max-w-xl text-neutral-300 md:text-lg">{t.hero.subtitle}</p>
           <div className="flex flex-wrap gap-3 pt-2">
             <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium tracking-wide hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
