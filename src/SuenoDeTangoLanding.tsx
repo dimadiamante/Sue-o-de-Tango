@@ -162,7 +162,6 @@ const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.webp 800w, ${BASE_URL}images
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.webp`;
 const CTA_BG_SIZES = '100vw';
 
-
 // Google Maps location
 const MAPS_URL = 'https://maps.app.goo.gl/Xe1dM73d6raCRfNU7';
 
@@ -294,14 +293,6 @@ export default function SuenoDeTangoLanding(){
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600/40 font-text">
-      <style>{`
-        :root{--font-brand:'Cormorant Garamond',serif;--font-text:'Lato',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji'}
-        .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
-        .hero-title{color:#6a0f1a !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 18px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-        .hero-slogan{color:#000 !important;text-shadow:0 0 0.5px rgba(255,255,255,1),0 0 3px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 14px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-webkit-text-stroke:0.4px #000}
-        :root{color-scheme: dark}
-      `}</style>
-
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-neutral-950/60 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -369,7 +360,7 @@ export default function SuenoDeTangoLanding(){
       <section id="gallery" aria-label={t.nav.gallery} className="mx-auto max-w-7xl px-4 py-16">
         <header className="mb-8 flex items-end justify-between">
           <div><h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2><p className="mt-2 max-w-2xl text-neutral-400">{t.gallery.intro}</p></div>
-          <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg:white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
+          <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {IMAGES.map((img,i)=>(
@@ -442,9 +433,8 @@ export default function SuenoDeTangoLanding(){
             <img
               src={CTA_BG_DEFAULT}
               alt={IMAGES[5].alt[locale]}
-              className="h-full w-full object-cover opacity-40"
+              className="h-full w-full object-cover opacity-40 cta-image"
               loading="lazy"
-              style={{ filter: 'brightness(1.16) saturate(1.06) contrast(1.04)' }}
               onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
             />
           </picture>
@@ -512,12 +502,11 @@ export default function SuenoDeTangoLanding(){
           <button aria-label={t.lightbox.next} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10 hz-sm" onClick={nextImage}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 6l6 6-6 6"/></svg>
           </button>
-          <div className="w-[min(96vw,1600px)]" style={{maxHeight:'92vh'}}>
+          <div className="w-[min(96vw,1600px)] lb-wrap">
             <img
               src={IMAGES[lightboxIndex].src}
               alt={IMAGES[lightboxIndex].alt[locale]}
-              className={"h-full w-full rounded-2xl shadow-2xl ring-1 ring-white/10 "+(fitMode==='cover'?'object-cover':'object-contain')}
-              style={{maxHeight:'92vh', maxWidth:'min(96vw,1600px)'}}
+              className={"lb-img rounded-2xl shadow-2xl ring-1 ring-white/10 "+(fitMode==='cover'?'object-cover':'object-contain')}
               onLoad={(e)=>{ const img=e.currentTarget; const vw=Math.min(window.innerWidth,1600); const vh=window.innerHeight*0.92; const vp=vw/vh; const ar=img.naturalWidth/img.naturalHeight; const mode=((Math.abs(ar - vp)/vp) <= 0.12)?'cover':'contain'; setFitMode(mode as 'contain'|'cover'); }}
               onDoubleClick={()=> setFitMode(m=>m==='contain'?'cover':'contain')}
             />
