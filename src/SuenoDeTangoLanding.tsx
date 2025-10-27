@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 // Sueño de Tango — Variant 6 (compact, optimized)
 // RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
 // Fonts: Cormorant Garamond (brand) + Lato (text)
-// Animations & hover effects are in styles/app.css. Hero uses local static image.
+// Animations & hover effects live in styles/app.css. Only Hero uses an image background; site-wide bg removed.
 
 // -----------------------------
 // Types & locales
@@ -315,15 +315,20 @@ export default function SuenoDeTangoLanding(){
             </select>
             <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{setMenuOpen(s=>!s)}}>
               <span className="sr-only">Menu</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
             </button>
           </div>
         </div>
         {menuOpen && (
           <div className="border-t border-white/10 md:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3" onClick={()=>setMenuOpen(false)}>
-              <div className="mb-2"><label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
-                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option></select>
+              <div className="mb-2">
+                <label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
+                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm">
+                  <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option>
+                </select>
               </div>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
@@ -341,11 +346,15 @@ export default function SuenoDeTangoLanding(){
           <img
             src={HERO_BANNER}
             alt={IMAGES[0].alt[locale]}
-            className=\"h-full w-full object-cover opacity-70\"
-            loading="eager" decoding="async" fetchPriority="high" width={2000} height={1200}
+            className="h-full w-full object-cover opacity-70"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            width={2000}
+            height={1200}
             onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950" />
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
           <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim glow-breath">
@@ -364,15 +373,18 @@ export default function SuenoDeTangoLanding(){
       {/* Gallery */}
       <section id="gallery" aria-label={t.nav.gallery} className="mx-auto max-w-7xl px-4 py-16">
         <header className="mb-8 flex items-end justify-between">
-          <div><h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2><p className="mt-2 max-w-2xl text-neutral-400">{t.gallery.intro}</p></div>
+          <div>
+            <h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2>
+            <p className="mt-2 max-w-2xl text-neutral-400">{t.gallery.intro}</p>
+          </div>
           <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {IMAGES.map((img,i)=>(
             <button key={i} onClick={()=>openLightbox(i)} className="group relative overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-inset ring-white/10 hz-md transform-gpu">
               <div className="relative h-64 w-full md:h-60 lg:h-72">
-                <img src={img.src} alt={img.alt[locale]} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-95"/>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
+                <img src={img.src} alt={img.alt[locale]} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-95" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <span className="pointer-events-none absolute bottom-3 left-3 text-xs text-neutral-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">{img.alt[locale]}</span>
               </div>
             </button>
@@ -488,13 +500,19 @@ export default function SuenoDeTangoLanding(){
       {lightboxIndex!==null && (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
           <button aria-label={t.lightbox.close} className="absolute right-4 top-4 rounded-xl border border-white/20 p-2 hover:bg-white/10 hz-sm" onClick={closeLightbox}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
           </button>
           <button aria-label={t.lightbox.prev} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10 hz-sm" onClick={prevImage}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </button>
           <button aria-label={t.lightbox.next} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10 hz-sm" onClick={nextImage}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 6l6 6-6 6"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
           </button>
           <div className="w-[min(96vw,1600px)] lb-wrap">
             <img
@@ -515,13 +533,22 @@ export default function SuenoDeTangoLanding(){
           <p className="text-sm text-neutral-400">© {new Date().getFullYear()} {t.siteTitle}</p>
           <div className="flex items-center gap-4 text-neutral-300">
             <a href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" className="hover:text-red-400 inline-flex hz-sm" aria-label="Instagram" target="_blank" rel="noreferrer noopener">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <path d="M17.5 6.5h.01" />
+              </svg>
             </a>
             <a href="https://www.facebook.com/dimon.yachmen" className="hover:text-red-400 inline-flex hz-sm" aria-label="Facebook" target="_blank" rel="noreferrer noopener">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+              </svg>
             </a>
             <a href="https://www.youtube.com/@dimadiamante" className="hover:text-red-400 inline-flex hz-sm" aria-label="YouTube" target="_blank" rel="noreferrer noopener">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 3.8 12 3.8 12 3.8s-6.88 0-8.59.62a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 2C5.12 20.2 12 20.2 12 20.2s6.88 0 8.59-.62a2.78 2.78 0 0 0 1.95-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><path d="M9.75 15.02 15.5 12 9.75 8.98v6.04z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 3.8 12 3.8 12 3.8s-6.88 0-8.59.62a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 2C5.12 20.2 12 20.2 12 20.2s6.88 0 8.59-.62a2.78 2.78 0 0 0 1.95-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+                <path d="M9.75 15.02 15.5 12 9.75 8.98v6.04z" />
+              </svg>
             </a>
           </div>
         </div>
