@@ -130,8 +130,8 @@ const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
 
 // Video sources (local first, then optional CDN). If none work, we fall back to image silently.
 
-const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.jpg 800w, ${BASE_URL}images/cta-bg-1200.jpg 1200w, ${BASE_URL}images/cta-bg-1600.jpg 1600w, ${BASE_URL}images/cta-bg-2000.jpg 2000w`;
-const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.jpg`;
+const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.webp 800w, ${BASE_URL}images/cta-bg-1200.webp 1200w, ${BASE_URL}images/cta-bg-1600.webp 1600w, ${BASE_URL}images/cta-bg-2000.webp 2000w`;
+const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.webp`;
 const CTA_BG_SIZES = '100vw';
 
 // Google Maps location
