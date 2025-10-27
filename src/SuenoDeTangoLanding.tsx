@@ -349,6 +349,7 @@ export default function SuenoDeTangoLanding(){
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
           <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim glow-breath">
             <span className="hero-line hero-line1">Sueño</span>
+            <br />
             <span className="hero-line hero-line2">de Tango</span>
           </h1>
           <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left glow-breath">{t.hero.slogan}</p>
