@@ -349,103 +349,11 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
       <section id="hero" className="relative isolate">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
-            src={HERO_BANNER}
-            alt={IMAGES[0].alt[locale]}
-            className="h-full w-full object-cover opacity-70"
-            loading="eager"
-            onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
-        </div>
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
-          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim glow-breath">
-            <span className="hero-line hero-line1">Sueño</span>
-            <span className="hero-line hero-line2">de Tango</span>
-          </h1>
-          <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left glow-breath">{t.hero.slogan}</p>
-          <p className="max-w-xl text-neutral-300 md:text-lg">{t.hero.subtitle}</p>
-          <div className="flex flex-wrap gap-3 pt-2">
-            <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium tracking-wide hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
-            <a href="#gallery" className="rounded-2xl border border-white/20 px-5 py-3 text-sm hover:bg-white/10">{t.hero.ctaGallery}</a>
-          </div>
-        </div>
-      </section>
-
-      {/* Gallery */}
-      <section id="gallery" aria-label={t.nav.gallery} className="mx-auto max-w-7xl px-4 py-16">
-        <header className="mb-8 flex items-end justify-between">
-          <div><h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2><p className="mt-2 max-w-2xl text-neutral-400">{t.gallery.intro}</p></div>
-          <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
-        </header>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {IMAGES.map((img,i)=>(
-            <button key={i} onClick={()=>openLightbox(i)} className="group relative overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-inset ring-white/10 hz-md transform-gpu">
-              <div className="relative h-64 w-full md:h-60 lg:h-72">
-                <img src={img.src} alt={img.alt[locale]} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-95"/>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
-                <span className="pointer-events-none absolute bottom-3 left-3 text-xs text-neutral-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">{img.alt[locale]}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Schedule */}
-      <section id="schedule" aria-label={t.nav.schedule} className="mx-auto max-w-7xl px-4 py-16">
-        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div><h2 className="font-brand text-3xl md:text-4xl">{t.schedule.title}</h2><p className="mt-2 max-w-2xl text-neutral-400">{t.schedule.intro}</p></div>
-          <div role="tablist" aria-label="Weekdays" className="flex flex-wrap gap-2">
-            {WEEK_ORDER.map(dayIdx=> (
-              <button key={dayIdx} role="tab" aria-selected={activeDay===dayIdx} onClick={()=>{console.log('[Schedule] set activeDay', dayIdx); setActiveDay(dayIdx)}} className={`rounded-xl border px-3 py-1.5 text-sm transition ${activeDay===dayIdx?'border-red-500 bg-red-600/20':'border-white/10 bg-neutral-900 hover:bg-white/10'}`}>
-                {DAYS[locale][dayIdx]}
-              </button>
-            ))}
-          </div>
-        </header>
-        {SCHEDULE.filter(e=>e.dayIndex===activeDay).length===0? (
-          <div className="rounded-2xl border border-white/10 bg-neutral-900 p-6 text-neutral-300"><p className="mb-3">—</p><a href="#contact" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.schedule.cta}</a></div>
-        ):(
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {SCHEDULE.filter(e=>e.dayIndex===activeDay).map((e,i)=>(
-              <div key={i} className="rounded-2xl border border-white/10 bg-neutral-900 p-4 hz-sm transform-gpu">
-                <div className="flex items-center justify-between"><h3 className="text-lg font-semibold">{t.schedule.titles[e.titleKey]}</h3><span className="rounded-md border border-white/10 px-2 py-0.5 text-xs text-neutral-300">{t.schedule.levels[e.levelKey]}</span></div>
-                <p className="mt-1 text-neutral-300">{e.time}</p>
-                <p className="text-sm text-neutral-400">{e.teacher} • {t.schedule.rooms[e.roomKey]}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-neutral-400">{t.schedule.note}</p><a href="#contact" className="rounded-2xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.schedule.cta}</a></div>
-      </section>
-
-      {/* About */}
-      <section id="about" className="mx-auto max-w-7xl px-4 pb-6 pt-2">
-        <div className="grid items-start gap-10 md:grid-cols-2">
-          <div>
-            <h2 className="font-brand text-3xl md:text-4xl">{t.about.title}</h2>
-            <p className="mt-4 text-neutral-300">{t.about.p1}</p>
-            <p className="mt-2 text-neutral-300">{t.about.p2}</p>
-            <ul className="mt-6 space-y-2 text-neutral-300">{t.about.bullets.map((b,i)=>(<li key={i}>• {b}</li>))}</ul>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-neutral-900 p-6 shadow-2xl">
-            <h3 className="mb-3 text-lg font-semibold">{t.about.whyTitle}</h3>
-            <p className="text-neutral-300">{t.about.whyText}</p>
-            <div className="mt-6 flex flex-wrap gap-3"><a href="#cta" className="rounded-xl bg-red-600 px-4 py-2 text-sm hover:bg-red-500 hz-sm transform-gpu">{t.about.join}</a><a href="#contact" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.about.ask}</a></div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section id="cta" className="relative mx-4 my-16 overflow-hidden rounded-3xl">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-r from-red-900/50 via-neutral-900 to-black"/>
-          <picture>
-            <source type="image/webp" srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES}/>
-            <img
               src={CTA_BG_DEFAULT}
               alt={IMAGES[5].alt[locale]}
-              className="h-full w-full object-cover opacity-25"
+              className="h-full w-full object-cover opacity-40"
               loading="lazy"
+              style={{ filter: 'brightness(1.16) saturate(1.06) contrast(1.04)' }}
               onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
             />
           </picture>
