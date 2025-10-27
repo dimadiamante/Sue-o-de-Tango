@@ -265,16 +265,6 @@ export default function SuenoDeTangoLanding(){
     }
   },[]);
 
-  // Site-wide repeating background (body)
-  useEffect(()=>{
-    try{
-      document.body.classList.add('has-site-bg');
-      document.body.style.setProperty('--site-bg-url', `url(${CTA_BG_DEFAULT})`);
-    }catch{}
-    return ()=>{
-      try{ document.body.classList.remove('has-site-bg'); document.body.style.removeProperty('--site-bg-url'); }catch{}
-    };
-  },[]);
 
   // Favicons (local files, no external links)
   useEffect(()=>{
