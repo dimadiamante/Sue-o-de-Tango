@@ -427,20 +427,9 @@ export default function SuenoDeTangoLanding(){
       </section>
 
       {/* CTA */}
-      <section id="cta" className="relative isolate">
-        <div className="absolute inset-0 -z-10 bg-neutral-950">
-          <picture>
-            <source type="image/webp" srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES} />
-            <img
-              src={CTA_BG_DEFAULT}
-              alt={IMAGES[5].alt[locale]}
-              className="h-full w-full object-contain opacity-40 cta-image"
-              loading="lazy"
-              onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
-            />
-          </picture>
-        </div>
-        <div className="mx-auto max-w-7xl px-4 py-16">
+      <section id=\"cta\" className=\"relative isolate\">
+        <div className=\"absolute inset-0 -z-10 bg-neutral-950\" />
+        <div className=\"mx-auto max-w-7xl px-4 py-16\">
           <div className="rounded-3xl border border-white/10 bg-neutral-900/80 p-8 backdrop-blur">
             <h2 className="font-brand text-3xl md:text-4xl">{t.cta.title}</h2>
             <p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p>
