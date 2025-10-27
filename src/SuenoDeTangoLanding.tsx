@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-// Sueño de Tango — Variant 6 (compact, fixed)
-// RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, microblog, i18n, CTA, contact form.
+// Sueño de Tango — Variant 6 (compact)
+// RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
 // Fonts: Cormorant Garamond (brand) + Lato (text)
 // HERO uses static image background (local), with gradient overlay and glow animation.
 
@@ -53,7 +53,6 @@ const I18N = {
       form:{title:'Send a request',name:'Name',phone:'Phone',email:'Email',level:'Level',levels:['Beginners','Improvers','Intermediate / Advanced','Private Lessons'],message:'Message',messagePh:'Ask a question or tell us the time that suits you',submit:'Send',consent:'By sending, you agree to data processing.'},
       alert:'Thank you! We will contact you soon.'
     },
-    microblog:{title:'Microblog',more:'Read'},
     lightbox:{close:'Close',prev:'Previous',next:'Next'}
   },
   ro:{
@@ -84,7 +83,6 @@ const I18N = {
       form:{title:'Trimite o cerere',name:'Nume',phone:'Telefon',email:'Email',level:'Nivel',levels:['Începători','Continuați','Intermediar / Avansat','Lecții private'],message:'Mesaj',messagePh:'Întreabă ceva sau spune-ne ora preferată',submit:'Trimite',consent:'Prin trimitere, ești de acord cu prelucrarea datelor.'},
       alert:'Mulțumim! Te contactăm în curând.'
     },
-    microblog:{title:'Microblog',more:'Citește'},
     lightbox:{close:'Închide',prev:'Anterior',next:'Următor'}
   },
   ru:{
@@ -115,7 +113,6 @@ const I18N = {
       form:{title:'Отправить заявку',name:'Имя',phone:'Телефон',email:'Email',level:'Уровень',levels:['Новички','Продолжающие','Средний / Продвинутый','Индивидуальные занятия'],message:'Сообщение',messagePh:'Задайте вопрос или укажите удобное время',submit:'Отправить',consent:'Отправляя форму, вы соглашаетесь на обработку данных.'},
       alert:'Спасибо! Мы свяжемся с вами в ближайшее время.'
     },
-    microblog:{title:'Микроблог',more:'Читать'},
     lightbox:{close:'Закрыть',prev:'Назад',next:'Вперёд'}
   },
   fr:{
@@ -146,7 +143,6 @@ const I18N = {
       form:{title:'Envoyer une demande',name:'Nom',phone:'Téléphone',email:'E‑mail',level:'Niveau',levels:['Débutants','Intermédiaires','Intermédiaire / Avancé','Cours particuliers'],message:'Message',messagePh:'Posez une question ou indiquez l’horaire qui vous convient',submit:'Envoyer',consent:'En envoyant, vous acceptez le traitement des données.'},
       alert:'Merci ! Nous vous contacterons bientôt.'
     },
-    microblog:{title:'Microblog',more:'Lire'},
     lightbox:{close:'Fermer',prev:'Précédent',next:'Suivant'}
   }
 } as const;
@@ -187,39 +183,6 @@ const ALT = {
   fr:['Silhouette d’un couple en lumière dramatique','Gros plan des pas de tango','Abrazo à contre‑jour','Pivot avec torsion du buste','Couple sur une scène vide','Détails des chaussures des danseurs']
 };
 const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i],fr:ALT.fr[i]}}));
-
-// -----------------------------
-// Microblogs (horizontal scroll)
-// -----------------------------
-
-type MicroPost = { id:number; date:string; title:Record<Locale,string>; text:Record<Locale,string> };
-const MICROPOSTS: MicroPost[] = [
-  { id:1, date:'2025-10-01', title:{ en:'Why the embrace matters', ro:'De ce contează abrazo', ru:'Почему важен абразо', fr:'Pourquoi l’ abrazo compte' }, text:{
-    en:'In tango the embrace is our primary language. Before figures, we learn to breathe and listen in the abrazo.',
-    ro:'În tango, abrazo este primul nostru limbaj. Înaintea figurilor învățăm să respirăm și să ascultăm în îmbrățișare.',
-    ru:'В танго абразо — это наш первый язык. Прежде чем делать фигуры, мы учимся дышать и слушать в объятии.',
-    fr:'En tango, l’abrazo est notre première langue. Avant les figures, on apprend à respirer et à écouter dans l’étreinte.' } },
-  { id:2, date:'2025-10-05', title:{ en:'Silence between steps', ro:'Liniștea dintre pași', ru:'Тишина между шагами', fr:'Le silence entre les pas' }, text:{
-    en:'Good musicality respects silence. Leave space: the pause also dances.',
-    ro:'Muzicalitatea bună respectă tăcerea. Lasă spațiu: și pauza dansează.',
-    ru:'Хорошая музыкальность уважает тишину. Оставляйте пространство: пауза тоже танцует.',
-    fr:'Une bonne musicalité respecte le silence. Laissez de l’espace : la pause danse aussi.' } },
-  { id:3, date:'2025-10-10', title:{ en:'Axis & pivots: a tiny tip', ro:'Ax & pivots: un sfat mic', ru:'Ось и пивоты: маленький совет', fr:'Axe & pivots : un petit conseil' }, text:{
-    en:'Keep the crown of the head tall and release the ribs. A relaxed torso gives cleaner pivots.',
-    ro:'Ține creștetul alungit și relaxează cutia toracică. Toracele relaxat dă pivouri mai curate.',
-    ru:'Тянитесь макушкой и отпустите ребра. Расслабленный торс даёт более чистые пивоты.',
-    fr:'Gardez le sommet du crâne haut et relâchez les côtes. Un torse détendu donne des pivots plus nets.' } },
-  { id:4, date:'2025-10-14', title:{ en:'Practica vs milonga', ro:'Practica vs milonga', ru:'Практика и милонга', fr:'Práctica vs milonga' }, text:{
-    en:'Practica is for trying and failing safely. Milonga is for dialogue with the ronda. Both are needed.',
-    ro:'Practica e pentru a încerca și a greși în siguranță. Milonga este dialogul cu ronda. Ambele sunt necesare.',
-    ru:'Практика — чтобы пробовать и ошибаться безопасно. Милонга — это диалог с рондой. Нужны обе.',
-    fr:'La práctica sert à essayer et rater sans risque. La milonga est le dialogue avec la ronda. Les deux sont nécessaires.' } },
-  { id:5, date:'2025-10-20', title:{ en:'Vals breath', ro:'Respirația în vals', ru:'Дыхание в вальсе', fr:'Respiration dans le vals' }, text:{
-    en:'Think of phrases in 6 counts, not 3. It helps the flow and shared breath in vals.',
-    ro:'Gândește fraze în 6 timpi, nu în 3. Ajută fluxul și respirația comună în vals.',
-    ru:'Думайте фразами на 6 счётов, а не на 3. Это помогает течению и общему дыханию в вальсе.',
-    fr:'Pensez les phrases en 6 temps, pas en 3. Cela aide le flux et la respiration partagée en vals.' } }
-];
 
 // -----------------------------
 // Schedule (Monday‑first UI)
@@ -323,7 +286,6 @@ export default function SuenoDeTangoLanding(){
     add('icon', base + 'favicon-32.png', { type:'image/png', sizes:'32x32' });
     add('icon', base + 'favicon-192.png', { type:'image/png', sizes:'192x192' });
     add('apple-touch-icon', base + 'apple-touch-icon.png', { sizes:'180x180' });
-    // add('mask-icon', base + 'safari-pinned-tab.svg', { color:'#6a0f1a' });
     console.log('[Favicons] injected from', base);
     return ()=>{ links.forEach(l=> l.remove()); };
   },[]);
@@ -365,12 +327,6 @@ export default function SuenoDeTangoLanding(){
         .hz-md:hover{transform:translateZ(0) scale(1.06)}
         .hz-nav{transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
         .hz-nav:hover{transform:translateZ(0) scale(1.08)}
-        /* Dark horizontal scrollbar */
-        .micro-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) rgba(255,255,255,.06); color-scheme: dark;}
-        .micro-scroll::-webkit-scrollbar{height:10px}
-        .micro-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:9999px}
-        .micro-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:9999px;border:2px solid transparent;background-clip:padding-box}
-        .micro-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.4)}
         :root{color-scheme: dark}
         @media (prefers-reduced-motion: reduce){.hz-sm,.hz-md,.hz-nav{transition:none}.hz-sm:hover,.hz-md:hover,.hz-nav:hover{transform:none}}
       `}</style>
@@ -438,28 +394,11 @@ export default function SuenoDeTangoLanding(){
         </div>
       </section>
 
-      {/* Microblogs */}
-      <section id="microblog" className="mx-auto max-w-7xl px-4 py-16">
-        <h2 className="font-brand text-3xl md:text-4xl">{t.microblog.title}</h2>
-        <div className="mt-4 overflow-x-auto">
-          <ul className="flex gap-4 pb-2">
-            {MICROPOSTS.map((p)=> (
-              <li key={p.id} className="min-w-[280px] max-w-[320px] shrink-0 rounded-2xl border border-white/10 bg-neutral-900 p-4 hz-md transform-gpu">
-                <time className="text-xs text-neutral-400">{p.date}</time>
-                <h3 className="mt-2 font-semibold">{p.title[locale]}</h3>
-                <p className="mt-2 text-sm text-neutral-300">{p.text[locale]}</p>
-                <a href={`#micro-${p.id}`} onClick={(e)=>{e.preventDefault(); setMicroOpen(p.id);}} className="mt-3 inline-flex text-sm text-red-400 underline decoration-red-400/40 underline-offset-4 hover:text-red-300">{t.microblog.more}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       {/* Gallery */}
       <section id="gallery" aria-label={t.nav.gallery} className="mx-auto max-w-7xl px-4 py-16">
         <header className="mb-8 flex items-end justify-between">
           <div><h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2><p className="mt-2 max-w-2xl text-neutral-400">{t.gallery.intro}</p></div>
-          <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
+          <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg:white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {IMAGES.map((img,i)=>(
