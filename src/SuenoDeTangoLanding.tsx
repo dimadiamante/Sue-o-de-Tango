@@ -365,6 +365,13 @@ export default function SuenoDeTangoLanding(){
         .hz-md:hover{transform:translateZ(0) scale(1.06)}
         .hz-nav{transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
         .hz-nav:hover{transform:translateZ(0) scale(1.08)}
+        /* Dark horizontal scrollbar */
+        .micro-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) rgba(255,255,255,.06); color-scheme: dark;}
+        .micro-scroll::-webkit-scrollbar{height:10px}
+        .micro-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:9999px}
+        .micro-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:9999px;border:2px solid transparent;background-clip:padding-box}
+        .micro-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.4)}
+        :root{color-scheme: dark}
         @media (prefers-reduced-motion: reduce){.hz-sm,.hz-md,.hz-nav{transition:none}.hz-sm:hover,.hz-md:hover,.hz-nav:hover{transform:none}}
       `}</style>
 
