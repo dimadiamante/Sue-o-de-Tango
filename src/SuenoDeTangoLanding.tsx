@@ -132,6 +132,7 @@ const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
 
 const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.webp 800w, ${BASE_URL}images/cta-bg-1200.webp 1200w, ${BASE_URL}images/cta-bg-1600.webp 1600w, ${BASE_URL}images/cta-bg-2000.webp 2000w`;
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.webp`;
+
 const CTA_BG_SIZES = '100vw';
 
 // Google Maps location
@@ -438,7 +439,16 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
       <section id="cta" className="relative mx-4 my-16 overflow-hidden rounded-3xl">
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-r from-red-900/50 via-neutral-900 to-black"/>
-          <img src={CTA_BG_DEFAULT} srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES} alt={IMAGES[5].alt[locale]} className="h-full w-full object-cover opacity-25" loading="lazy"/>
+          <picture>
+            <source type="image/webp" srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES}/>
+            <img
+              src={CTA_BG_DEFAULT}
+              alt={IMAGES[5].alt[locale]}
+              className="h-full w-full object-cover opacity-25"
+              loading="lazy"
+              onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
+            />
+          </picture>
         </div>
         <div className="mx-auto flex max-w-7xl flex-col items-start gap-4 px-6 py-12 md:flex-row md:items-center md:justify-between md:py-14">
           <div><h3 className="font-brand text-2xl md:text-3xl">{t.cta.title}</h3><p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p></div>
