@@ -154,9 +154,9 @@ const I18N = {
 // Base URL for GitHub Pages compatibility (Vite injects base path)
 const BASE_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.BASE_URL) ? (import.meta as any).env.BASE_URL as string : '/';
 
-const HERO_BANNER_RAW = BASE_URL + "images/my-hero.webp";
+const HERO_BANNER_RAW = BASE_URL + 'images/my-hero.webp';
 const HERO_BANNER = encodeURI(HERO_BANNER_RAW);
-const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
+const FALLBACK_HERO = BASE_URL + 'images/fallback-hero.webp';
 
 const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.webp 800w, ${BASE_URL}images/cta-bg-1200.webp 1200w, ${BASE_URL}images/cta-bg-1600.webp 1600w, ${BASE_URL}images/cta-bg-2000.webp 2000w`;
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.webp`;
@@ -177,10 +177,10 @@ const CONTACT_PHONE_TEL = '+40749901534';
 const GALLERY_FILES = ['gallery-01.webp','gallery-02.webp','gallery-03.webp','gallery-04.webp','gallery-05.webp','gallery-06.webp'];
 const IMG_SRC = GALLERY_FILES.map(f => BASE_URL + 'images/' + f);
 const ALT = {
-  en:['Silhouette couple in dramatic light','Close‑up tango steps','Abrazo in backlight','Pivot with torso twist','Couple on an empty stage','Dancers’ shoes details'],
-  ro:['Siluetă de cuplu în lumină dramatică','Prim‑plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte'],
+  en:['Silhouette couple in dramatic light','Close-up tango steps','Abrazo in backlight','Pivot with torso twist','Couple on an empty stage','Dancers\' shoes details'],
+  ro:['Siluetă de cuplu în lumină dramatică','Prim-plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte'],
   ru:['Силуэт пары в драматичном свете','Крупный план шагов танго','Абразо на контровом свете','Пивот с разворотом корпуса','Пара на пустой сцене','Детали танцевальной обуви'],
-  fr:['Silhouette d’un couple en lumière dramatique','Gros plan des pas de tango','Abrazo à contre‑jour','Pivot avec torsion du buste','Couple sur une scène vide','Détails des chaussures des danseurs']
+  fr:['Silhouette d\'un couple en lumière dramatique','Gros plan des pas de tango','Abrazo à contre-jour','Pivot avec torsion du buste','Couple sur une scène vide','Détails des chaussures des danseurs']
 };
 const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i],fr:ALT.fr[i]}}));
 
@@ -217,17 +217,22 @@ function runSanityChecks(){
 
   end=group('wrapIndex boundaries'); const L=IMAGES.length,t1=wrapIndex(L,0,-1)===L-1,t2=wrapIndex(L,L-1,1)===0,t3=wrapIndex(L,2,-3)===L-1; !(t1&&t2&&t3)?console.error('[SANITY] wrapIndex failed',{t1,t2,t3,L}):console.log('[SANITY] OK'); end();
 
-  end=group('Images alt per locale'); const miss: Array<{idx:number;missing:Locale[]}> = []; IMAGES.forEach((img)=>{const m:Locale[]=[]; LOCALES.forEach(Lc=>{if(!img.alt[Lc])m.push(Lc)}); if(m.length)miss.push({idx:IMAGES.indexOf(img),missing:m})}); miss.length?console.error('[SANITY] Missing alts',miss):console.log('[SANITY] OK'); end();
+  end=group('Images alt per locale'); const miss: Array<{idx:number;missing:Locale[]}> = []; IMAGES.forEach((img,i)=>{const m:Locale[]=[]; LOCALES.forEach(Lc=>{if(!img.alt[Lc])m.push(Lc)}); if(m.length)miss.push({idx:i,missing:m})}); miss.length?console.error('[SANITY] Missing alts',miss):console.log('[SANITY] OK'); end();
 
   end=group('Schedule keys present in I18N'); const missing:any[]=[]; SCHEDULE.forEach((s,i)=>{LOCALES.forEach(Lc=>{const tt=I18N[Lc].schedule; if(!tt.titles[s.titleKey])missing.push({i,Lc,key:s.titleKey,type:'title'}); if(!tt.levels[s.levelKey])missing.push({i,Lc,key:s.levelKey,type:'level'}); if(!tt.rooms[s.roomKey])missing.push({i,Lc,key:s.roomKey,type:'room'})})}); missing.length?console.error('[SANITY] Missing schedule translations',missing):console.log('[SANITY] OK'); end();
 
-  end=group('WEEK_ORDER Monday‑first'); const isPerm=WEEK_ORDER.slice().sort().every((v,i)=>v===i); !(WEEK_ORDER[0]===1&&WEEK_ORDER[6]===0&&isPerm)?console.error('[SANITY] WEEK_ORDER invalid',WEEK_ORDER):console.log('[SANITY] OK: Monday‑first'); end();
+  end=group('WEEK_ORDER Monday-first'); const isPerm=WEEK_ORDER.slice().sort().every((v,i)=>v===i); !(WEEK_ORDER[0]===1&&WEEK_ORDER[6]===0&&isPerm)?console.error('[SANITY] WEEK_ORDER invalid',WEEK_ORDER):console.log('[SANITY] OK: Monday-first'); end();
 
   end=group('Schedule time 24h format'); const re=/^([01]\d|2[0-3]):[0-5]\d–([01]\d|2[0-3]):[0-5]\d$/; const badTimes=SCHEDULE.filter(s=>!re.test(s.time)); badTimes.length?console.error('[SANITY] Bad time format',badTimes):console.log('[SANITY] OK'); end();
 
   end=group('Exactly one EN DASH in each time'); const split=SCHEDULE.filter(s=>s.time.split('–').length!==2); split.length?console.error('[SANITY] Multiple or missing EN DASH',split):console.log('[SANITY] OK'); end();
 
   end=group('CTA srcset sanity'); const ok=['800w','1200w','1600w','2000w'].every(k=>CTA_BG_SRCSET.includes(k)); !ok?console.error('[SANITY] CTA_BG_SRCSET missing sizes'):console.log('[SANITY] OK'); end();
+
+  // Extra: assets expectations
+  end=group('Gallery file extensions are .webp'); const wrongExt=GALLERY_FILES.filter(f=>!f.endsWith('.webp')); wrongExt.length?console.error('[SANITY] Non-webp images',wrongExt):console.log('[SANITY] OK'); end();
+  end=group('Hero assets are .webp'); const heroOk=HERO_BANNER.endsWith('.webp')&&FALLBACK_HERO.endsWith('.webp'); !heroOk?console.error('[SANITY] Hero not webp'):
+  console.log('[SANITY] OK'); end();
 }
 
 // -----------------------------
@@ -264,7 +269,6 @@ export default function SuenoDeTangoLanding(){
       const l=document.createElement('link'); l.rel='preload'; l.as='image'; l.href=HERO_BANNER; l.setAttribute('data-preload-hero',''); document.head.appendChild(l);
     }
   },[]);
-
 
   // Favicons (local files, no external links)
   useEffect(()=>{
@@ -426,10 +430,10 @@ export default function SuenoDeTangoLanding(){
         </div>
       </section>
 
-      {/* CTA */}
-      <section id=\"cta\" className=\"relative isolate\">
-        <div className=\"absolute inset-0 -z-10 bg-neutral-950\" />
-        <div className=\"mx-auto max-w-7xl px-4 py-16\">
+      {/* CTA (plain color background, no image) */}
+      <section id="cta" className="relative isolate">
+        <div className="absolute inset-0 -z-10 bg-neutral-950" />
+        <div className="mx-auto max-w-7xl px-4 py-16">
           <div className="rounded-3xl border border-white/10 bg-neutral-900/80 p-8 backdrop-blur">
             <h2 className="font-brand text-3xl md:text-4xl">{t.cta.title}</h2>
             <p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p>
