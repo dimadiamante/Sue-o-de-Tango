@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 
 // Sueño de Tango — Variant 6 (compact, optimized)
 // RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
@@ -243,6 +243,9 @@ export default function SuenoDeTangoLanding(){
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
 
+  // measure hero height for site-wide background offset
+  const heroRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
 
@@ -263,6 +266,19 @@ export default function SuenoDeTangoLanding(){
     if (!document.querySelector('link[data-preload-hero]')) {
       const l=document.createElement('link'); l.rel='preload'; l.as='image'; l.href=HERO_BANNER; l.setAttribute('data-preload-hero',''); document.head.appendChild(l);
     }
+  },[]);
+
+  // Compute CSS var for hero height so the repeating site background starts BELOW the banner
+  useEffect(()=>{
+    const updateHeroH = ()=>{
+      const h = heroRef.current?.offsetHeight || 0;
+      try { document.documentElement.style.setProperty('--hero-h', `${h}px`); } catch {}
+    };
+    updateHeroH();
+    window.addEventListener('resize', updateHeroH);
+    const obs = new ResizeObserver(updateHeroH);
+    if (heroRef.current) obs.observe(heroRef.current);
+    return ()=>{ window.removeEventListener('resize', updateHeroH); obs.disconnect(); };
   },[]);
 
   // Favicons (local files, no external links)
@@ -331,7 +347,7 @@ export default function SuenoDeTangoLanding(){
       </header>
 
       {/* Hero */}
-      <section id="hero" className="relative isolate">
+      <section id="hero" ref={heroRef} className="relative isolate">
         <div className="absolute inset-0 z-0 overflow-hidden bg-neutral-950">
           <img
             src={HERO_BANNER}
@@ -355,6 +371,19 @@ export default function SuenoDeTangoLanding(){
           </div>
         </div>
       </section>
+
+      {/* Site-wide repeating background below hero */}
+      <div
+        className="fixed inset-x-0 bottom-0 -z-10 pointer-events-none"
+        style={{
+          top: 'var(--hero-h, 0px)',
+          backgroundImage: `url(${CTA_BG_DEFAULT})`,
+          backgroundRepeat: 'repeat',
+          backgroundPosition: 'top center',
+          backgroundSize: '900px auto',
+          opacity: 0.08
+        }}
+      />
 
       {/* Gallery */}
       <section id="gallery" aria-label={t.nav.gallery} className="mx-auto max-w-7xl px-4 py-16">
