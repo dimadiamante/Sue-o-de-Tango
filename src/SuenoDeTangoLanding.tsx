@@ -332,11 +332,11 @@ export default function SuenoDeTangoLanding(){
 
       {/* Hero */}
       <section id="hero" className="relative isolate">
-        <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 z-0 overflow-hidden bg-neutral-950">
           <img
             src={HERO_BANNER}
             alt={IMAGES[0].alt[locale]}
-            className="h-full w-full object-cover opacity-70"
+            className="h-full w-full object-contain opacity-70"
             loading="eager" decoding="async" fetchpriority="high" width={2000} height={1200}
             onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
           />
@@ -427,13 +427,13 @@ export default function SuenoDeTangoLanding(){
 
       {/* CTA */}
       <section id="cta" className="relative isolate">
-        <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 -z-10 bg-neutral-950">
           <picture>
             <source type="image/webp" srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES} />
             <img
               src={CTA_BG_DEFAULT}
               alt={IMAGES[5].alt[locale]}
-              className="h-full w-full object-cover opacity-40 cta-image"
+              className="h-full w-full object-contain opacity-40 cta-image"
               loading="lazy"
               onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
             />
