@@ -294,6 +294,27 @@ export default function SuenoDeTangoLanding(){
     return ()=>{ links.forEach(l=> l.remove()); };
   },[]);
 
+  // Favicons (local files, no external links)
+  useEffect(()=>{
+    const links: HTMLLinkElement[] = [];
+    const add = (rel:string, href:string, attrs?:Record<string,string>)=>{
+      const l = document.createElement('link');
+      l.rel = rel; l.href = href;
+      if(attrs){ for(const [k,v] of Object.entries(attrs)) l.setAttribute(k,v); }
+      l.setAttribute('data-local-favicon','');
+      document.head.appendChild(l); links.push(l);
+    };
+    const base = BASE_URL + 'images/';
+    add('icon', base + 'favicon.svg', { type:'image/svg+xml' });
+    add('icon', base + 'favicon-32.png', { type:'image/png', sizes:'32x32' });
+    add('icon', base + 'favicon-192.png', { type:'image/png', sizes:'192x192' });
+    add('apple-touch-icon', base + 'apple-touch-icon.png', { sizes:'180x180' });
+    // If you add safari-pinned-tab.svg locally, uncomment the next line
+    // add('mask-icon', base + 'safari-pinned-tab.svg', { color:'#6a0f1a' });
+    console.log('[Favicons] injected from', base);
+    return ()=>{ links.forEach(l=> l.remove()); };
+  },[]);
+
   const openLightbox=useCallback((i:number)=>{console.log('[LB] open', i); setLightboxIndex(i)},[]);
   const closeLightbox=useCallback(()=>{console.log('[LB] close'); setLightboxIndex(null)},[]);
   const prevImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] prev'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,-1))},[lightboxIndex]);
