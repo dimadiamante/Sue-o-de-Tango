@@ -243,8 +243,6 @@ export default function SuenoDeTangoLanding(){
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
 
-  const heroRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
 
@@ -350,7 +348,7 @@ export default function SuenoDeTangoLanding(){
             src={HERO_BANNER}
             alt={IMAGES[0].alt[locale]}
             className="h-full w-full object-contain opacity-70"
-            loading="eager" decoding="async" fetchpriority="high" width={2000} height={1200}
+            loading="eager" decoding="async" fetchPriority="high" width={2000} height={1200}
             onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
@@ -547,52 +545,4 @@ export default function SuenoDeTangoLanding(){
       </footer>
     </div>
   );
-}
-
-/* === Global theme & fonts === */
-:root{
-  --font-brand:'Cormorant Garamond',serif;
-  --font-text:'Lato',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji';
-  color-scheme: dark;
-}
-.font-brand{font-family:var(--font-brand)}
-.font-text{font-family:var(--font-text)}
-
-/* === Hero typography (moved from inline) === */
-.hero-title{
-  color:#6a0f1a !important;
-  text-shadow:
-    0 0 2px rgba(255,255,255,1),
-    0 0 8px rgba(255,255,255,.98),
-    0 0 18px rgba(255,255,255,.9) !important;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-}
-.hero-slogan{
-  color:#000 !important;
-  text-shadow:
-    0 0 0.5px rgba(255,255,255,1),
-    0 0 3px rgba(255,255,255,1),
-    0 0 8px rgba(255,255,255,.98),
-    0 0 14px rgba(255,255,255,.9) !important;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-  -webkit-text-stroke:0.4px #000;
-}
-
-/* === CTA background filter === */
-.cta-image{ filter: brightness(1.16) saturate(1.06) contrast(1.04); }
-
-/* === Lightbox sizing === */
-.lb-wrap{ max-height:92vh }
-.lb-img{ max-height:92vh; max-width:min(96vw,1600px) }
-
-/* === Site-wide repeating background below hero === */
-body.has-site-bg{
-  /* very transparent pattern via dark overlay */
-  background-image: linear-gradient(rgba(0,0,0,0.94), rgba(0,0,0,0.94)), var(--site-bg-url);
-  background-repeat: repeat;
-  background-size: 900px auto; /* tile size */
-  background-position: top center;
-  background-attachment: fixed;
 }
