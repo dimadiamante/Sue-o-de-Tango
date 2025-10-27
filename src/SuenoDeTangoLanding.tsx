@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 // Sueño de Tango — Variant 6 (compact, fixed)
 // RO default, EN supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
 // Fonts: Cormorant Garamond (brand) + Lato (text)
-// HERO uses background video with poster; safe fallback to image if video fails
 
 // -----------------------------
 // Types & locales
@@ -128,11 +127,8 @@ const HERO_BANNER_RAW = BASE_URL + "images/my-hero.webp";
 const HERO_BANNER = encodeURI(HERO_BANNER_RAW);
 const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
 
-// Video sources (local first, then optional CDN). If none work, we fall back to image silently.
-
 const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.webp 800w, ${BASE_URL}images/cta-bg-1200.webp 1200w, ${BASE_URL}images/cta-bg-1600.webp 1600w, ${BASE_URL}images/cta-bg-2000.webp 2000w`;
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.webp`;
-
 const CTA_BG_SIZES = '100vw';
 
 // Google Maps location
@@ -218,7 +214,6 @@ function runSanityChecks(){
   // TC16: HERO constants are defined and non-empty
   end=group('HERO constants defined'); const okHero = [HERO_BANNER_RAW,HERO_BANNER,FALLBACK_HERO].every(v=>typeof v==='string' && v.length>0); !okHero?console.error('[SANITY] HERO consts missing') : console.log('[SANITY] OK'); end();
 
-  // TC17: Video sources sanity — strings with types
   // TC18: BASE_URL applied to banner
   end=group('BASE_URL applied'); const okBase = HERO_BANNER_RAW.startsWith(BASE_URL); !okBase?console.error('[SANITY] BASE_URL not applied',{BASE_URL,HERO_BANNER_RAW}):console.log('[SANITY] OK'); end();
 }
@@ -236,8 +231,9 @@ export default function SuenoDeTangoLanding(){
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
 
-      
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
+
+  // Google Fonts injection (Cormorant Garamond + Lato)
   useEffect(()=>{
     const links: HTMLLinkElement[] = [];
     const pre1 = document.createElement('link');
@@ -271,17 +267,12 @@ export default function SuenoDeTangoLanding(){
   useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
   useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(lightboxIndex===null)return; if(e.key==='Escape')closeLightbox(); if(e.key==='ArrowLeft')prevImage(); if(e.key==='ArrowRight')nextImage(); if(e.key==='f'||e.key==='F') setFitMode(m=>m==='contain'?'cover':'contain')}; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey)},[lightboxIndex,closeLightbox,prevImage,nextImage]);
 
-  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; console.log('[Form] submit', obj); const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}
-Phone: ${obj.phone||''}
-Email: ${obj.email||''}
-Level: ${obj.level||''}
-Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
+  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; console.log('[Form] submit', obj); const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600/40 font-text">
       <style>{`
         html{scroll-behavior:smooth}
-        
         
         :root{--font-brand:'Cormorant Garamond',serif;--font-text:'Lato',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji'}
         .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
@@ -348,7 +339,9 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
       {/* Hero */}
       <section id="hero" className="relative isolate">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <img
+          <picture>
+            <source type="image/webp" srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES} />
+            <img
               src={CTA_BG_DEFAULT}
               alt={IMAGES[5].alt[locale]}
               className="h-full w-full object-cover opacity-40"
@@ -358,9 +351,17 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
             />
           </picture>
         </div>
-        <div className="mx-auto flex max-w-7xl flex-col items-start gap-4 px-6 py-12 md:flex-row md:items-center md:justify-between md:py-14">
-          <div><h3 className="font-brand text-2xl md:text-3xl">{t.cta.title}</h3><p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p></div>
-          <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium hover:bg-red-500">{t.cta.btn}</a>
+        <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-3 px-6 py-16">
+          <h1 className="hero-title hero-anim glow-breath max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left">
+            <span className="hero-line hero-line1">Sueño</span>
+            <span className="hero-line hero-line2">de Tango</span>
+          </h1>
+          <p className="hero-slogan glow-breath font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left">{t.hero.slogan}</p>
+          <p className="mt-3 max-w-2xl text-neutral-300">{t.hero.subtitle}</p>
+          <div className="mt-5 flex gap-3">
+            <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
+            <a href="#gallery" className="rounded-2xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.hero.ctaGallery}</a>
+          </div>
         </div>
       </section>
 
