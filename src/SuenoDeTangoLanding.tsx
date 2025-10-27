@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 // Sueño de Tango — Variant 6 (compact, fixed)
 // RO default, EN supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
 // Fonts: Cormorant Garamond (brand) + Lato (text)
-// HERO uses background video with poster; safe fallback to image if video fails
 
 // -----------------------------
 // Types & locales
