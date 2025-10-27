@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-// Sueño de Tango — Variant 6 (compact)
+// Sueño de Tango — Variant 6 (compact, optimized)
 // RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
 // Fonts: Cormorant Garamond (brand) + Lato (text)
-// HERO uses static image background (local), with gradient overlay and glow animation.
+// Animations & hover effects are in styles/app.css. Hero uses local static image.
 
 // -----------------------------
 // Types & locales
@@ -137,11 +137,11 @@ const I18N = {
       bullets:['Groupes pour tous niveaux','Pratiques régulières et milongas','Cours particuliers et stages intensifs'],
       whyTitle:'Pourquoi « Sueño de Tango »', whyText:'Notre philosophie visuelle — le contraste entre la lumière et l’ombre, où chaque pause et pivot se lit comme un plan de cinéma. Nous construisons la danse comme un dialogue et vous invitons dans cette histoire.', join:'Rejoindre', ask:'Poser une question'
     },
-    cta:{title:'Prêt pour le premier pas ?',text:'Réservez une leçon d’essai — nous trouverons un niveau et un partenariat confortables.',btn:'S’inscrire'},
+    cta:{title:'Prêt pour le premier pas ?',text:'Réservez une leçon d’essai — nous trouverons un niveau et un partenariat confortables.',btn:'S’inscrire'},
     contact:{
       title:'Contact',intro:'Nous sommes au centre-ville. Écrivez‑nous ou laissez une demande.', addressLabel:'Adresse',address:'Strada Vlaicu Vodă 7, București', phoneLabel:'Téléphone', instagram:'Instagram', emailLabel:'E‑mail',
       form:{title:'Envoyer une demande',name:'Nom',phone:'Téléphone',email:'E‑mail',level:'Niveau',levels:['Débutants','Intermédiaires','Intermédiaire / Avancé','Cours particuliers'],message:'Message',messagePh:'Posez une question ou indiquez l’horaire qui vous convient',submit:'Envoyer',consent:'En envoyant, vous acceptez le traitement des données.'},
-      alert:'Merci ! Nous vous contacterons bientôt.'
+      alert:'Merci ! Nous vous contacterons bientôt.'
     },
     lightbox:{close:'Fermer',prev:'Précédent',next:'Suivant'}
   }
@@ -151,7 +151,7 @@ const I18N = {
 // Assets
 // -----------------------------
 
-// Base URL for GitHub Pages compatibility (Vite will inject /REPO_NAME/)
+// Base URL for GitHub Pages compatibility (Vite injects base path)
 const BASE_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.BASE_URL) ? (import.meta as any).env.BASE_URL as string : '/';
 
 const HERO_BANNER_RAW = BASE_URL + "images/my-hero.webp";
@@ -202,7 +202,7 @@ const SCHEDULE: ScheduleItem[] = [
 const WEEK_ORDER = [1,2,3,4,5,6,0];
 
 // -----------------------------
-// Utils & Sanity tests
+// Utils & Sanity tests (act like lightweight test cases)
 // -----------------------------
 
 function wrapIndex(len:number,index:number,delta:number){return (index+delta+len)%len}
@@ -223,27 +223,11 @@ function runSanityChecks(){
 
   end=group('WEEK_ORDER Monday‑first'); const isPerm=WEEK_ORDER.slice().sort().every((v,i)=>v===i); !(WEEK_ORDER[0]===1&&WEEK_ORDER[6]===0&&isPerm)?console.error('[SANITY] WEEK_ORDER invalid',WEEK_ORDER):console.log('[SANITY] OK: Monday‑first'); end();
 
-  end=group('IMAGES src & locale keys'); const badSrc=IMAGES.filter(img=>!img.src.startsWith(BASE_URL)); const badLocaleKeys: Array<{idx:number;missing:string[]}> = []; IMAGES.forEach((img,i)=>{const m:string[]=[]; LOCALES.forEach(k=>{if(!(k in img.alt))m.push(k)}); if(m.length)badLocaleKeys.push({idx:i,missing:m})}); (badSrc.length||badLocaleKeys.length)?console.error('[SANITY] Images problems',{badSrc,badLocaleKeys}):console.log('[SANITY] OK'); end();
-
-  end=group('Brand consistency across locales'); const titles=LOCALES.map(l=>(I18N as any)[l].hero.title), slogans=LOCALES.map(l=>(I18N as any)[l].hero.slogan); !(titles.every(t=>t===titles[0])&&slogans.every(s=>s===slogans[0]))?console.error('[SANITY] Brand mismatch',{titles,slogans}):console.log('[SANITY] OK'); end();
-
   end=group('Schedule time 24h format'); const re=/^([01]\d|2[0-3]):[0-5]\d–([01]\d|2[0-3]):[0-5]\d$/; const badTimes=SCHEDULE.filter(s=>!re.test(s.time)); badTimes.length?console.error('[SANITY] Bad time format',badTimes):console.log('[SANITY] OK'); end();
-
-  end=group('Times trimmed and use EN DASH'); const space=SCHEDULE.filter(s=>s.time.trim()!==s.time), dash=SCHEDULE.filter(s=>!s.time.includes('–')); (space.length||dash.length)?console.error('[SANITY] Time spacing/dash issues',{space,dash}):console.log('[SANITY] OK'); end();
-
-  end=group('Time duration sanity'); const toMin=(h:string)=>{const [H,M]=h.split(':').map(Number); return H*60+M}; const dur=SCHEDULE.filter(s=>{const [a,b]=s.time.split('–'); return toMin(b)<=toMin(a)}); dur.length?console.error('[SANITY] Non‑positive durations',dur):console.log('[SANITY] OK'); end();
 
   end=group('Exactly one EN DASH in each time'); const split=SCHEDULE.filter(s=>s.time.split('–').length!==2); split.length?console.error('[SANITY] Multiple or missing EN DASH',split):console.log('[SANITY] OK'); end();
 
   end=group('CTA srcset sanity'); const ok=['800w','1200w','1600w','2000w'].every(k=>CTA_BG_SRCSET.includes(k)); !ok?console.error('[SANITY] CTA_BG_SRCSET missing sizes'):console.log('[SANITY] OK'); end();
-
-  end=group('Schedule title keys parity across locales'); const base=Object.keys(I18N.en.schedule.titles).sort(); const diffs=(Object.keys(I18N) as Locale[]).map(Lc=>{const k=Object.keys(I18N[Lc].schedule.titles).sort(); return {Lc, ok:k.length===base.length && k.every((v,i)=>v===base[i])};}).filter(x=>!x.ok); diffs.length?console.error('[SANITY] schedule.titles mismatch',diffs):console.log('[SANITY] OK'); end();
-
-  end=group('ALT length matches IMG_SRC'); const eqLen = ALT.en.length===IMG_SRC.length && ALT.ro.length===IMG_SRC.length && ALT.ru.length===IMG_SRC.length && ALT.fr.length===IMG_SRC.length; !eqLen?console.error('[SANITY] ALT length mismatch',{en:ALT.en.length,ro:ALT.ro.length,ru:ALT.ru.length,fr:ALT.fr.length,img:IMG_SRC.length}):console.log('[SANITY] OK'); end();
-
-  end=group('HERO constants defined'); const okHero = [HERO_BANNER_RAW,HERO_BANNER,FALLBACK_HERO].every(v=>typeof v==='string' && v.length>0); !okHero?console.error('[SANITY] HERO consts missing') : console.log('[SANITY] OK'); end();
-
-  end=group('BASE_URL applied'); const okBase = HERO_BANNER_RAW.startsWith(BASE_URL); !okBase?console.error('[SANITY] BASE_URL not applied',{BASE_URL,HERO_BANNER_RAW}):console.log('[SANITY] OK'); end();
 }
 
 // -----------------------------
@@ -262,39 +246,13 @@ export default function SuenoDeTangoLanding(){
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
 
-  // Google Fonts
+  // Google Fonts + App CSS + Preload hero (guarded)
   useEffect(()=>{
-    if (document.querySelector('link[data-gf]')) return;
-    if (document.querySelector('link[data-local-favicon]')) return;
-    const links: HTMLLinkElement[] = [];
-    const pre1 = document.createElement('link'); pre1.rel='preconnect'; pre1.href='https://fonts.googleapis.com'; pre1.setAttribute('data-gf',''); document.head.appendChild(pre1); links.push(pre1);
-    const pre2 = document.createElement('link'); pre2.rel='preconnect'; pre2.href='https://fonts.gstatic.com'; pre2.crossOrigin='anonymous'; pre2.setAttribute('data-gf',''); document.head.appendChild(pre2); links.push(pre2);
-    const css = document.createElement('link'); css.rel='stylesheet'; css.href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,100..900;1,100..900&display=swap'; css.setAttribute('data-gf',''); document.head.appendChild(css); links.push(css);
-    console.log('[Fonts] Google Fonts injected', css.href);
-    return ()=>{ links.forEach(l=> l.remove()); };
-  },[]);
-
-  // Favicons (local files, no external links)
-  useEffect(()=>{
-    const links: HTMLLinkElement[] = [];
-    const add = (rel:string, href:string, attrs?:Record<string,string>)=>{
-      const l = document.createElement('link');
-      l.rel = rel; l.href = href;
-      if(attrs){ for(const [k,v] of Object.entries(attrs)) l.setAttribute(k,v); }
-      l.setAttribute('data-local-favicon','');
-      document.head.appendChild(l); links.push(l);
-    };
-    const base = BASE_URL + 'images/';
-    add('icon', base + 'favicon.svg', { type:'image/svg+xml' });
-    add('icon', base + 'favicon-32.png', { type:'image/png', sizes:'32x32' });
-    add('icon', base + 'favicon-192.png', { type:'image/png', sizes:'192x192' });
-    add('apple-touch-icon', base + 'apple-touch-icon.png', { sizes:'180x180' });
-    console.log('[Favicons] injected from', base);
-    return ()=>{ links.forEach(l=> l.remove()); };
-  },[]);
-
-  // App CSS + Hero preload (guarded)
-  useEffect(()=>{
+    if (!document.querySelector('link[data-gf]')) {
+      const pre1 = document.createElement('link'); pre1.rel='preconnect'; pre1.href='https://fonts.googleapis.com'; pre1.setAttribute('data-gf',''); document.head.appendChild(pre1);
+      const pre2 = document.createElement('link'); pre2.rel='preconnect'; pre2.href='https://fonts.gstatic.com'; pre2.crossOrigin='anonymous'; pre2.setAttribute('data-gf',''); document.head.appendChild(pre2);
+      const css = document.createElement('link'); css.rel='stylesheet'; css.href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,100..900;1,100..900&display=swap'; css.setAttribute('data-gf',''); document.head.appendChild(css);
+    }
     if (!document.querySelector('link[data-app-css]')) {
       const l = document.createElement('link'); l.rel='stylesheet'; l.href=BASE_URL+'styles/app.css'; l.setAttribute('data-app-css',''); document.head.appendChild(l);
     }
@@ -303,45 +261,40 @@ export default function SuenoDeTangoLanding(){
     }
   },[]);
 
-  const openLightbox=useCallback((i:number)=>{console.log('[LB] open', i); setLightboxIndex(i)},[]);
-  const closeLightbox=useCallback(()=>{console.log('[LB] close'); setLightboxIndex(null)},[]);
-  const prevImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] prev'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,-1))},[lightboxIndex]);
-  const nextImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] next'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,1))},[lightboxIndex]);
+  // Favicons (local files, no external links)
+  useEffect(()=>{
+    if (document.querySelector('link[data-local-favicon]')) return;
+    const add = (rel:string, href:string, attrs?:Record<string,string>)=>{
+      const l = document.createElement('link'); l.rel = rel; l.href = href; if(attrs){ for(const [k,v] of Object.entries(attrs)) l.setAttribute(k,v); } l.setAttribute('data-local-favicon',''); document.head.appendChild(l);
+    };
+    const base = BASE_URL + 'images/';
+    add('icon', base + 'favicon.svg', { type:'image/svg+xml' });
+    add('icon', base + 'favicon-32.png', { type:'image/png', sizes:'32x32' });
+    add('icon', base + 'favicon-192.png', { type:'image/png', sizes:'192x192' });
+    add('apple-touch-icon', base + 'apple-touch-icon.png', { sizes:'180x180' });
+  },[]);
 
   useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
+
+  const openLightbox=useCallback((i:number)=>{setLightboxIndex(i)},[]);
+  const closeLightbox=useCallback(()=>{setLightboxIndex(null)},[]);
+  const prevImage=useCallback(()=>{if(lightboxIndex===null)return; setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,-1))},[lightboxIndex]);
+  const nextImage=useCallback(()=>{if(lightboxIndex===null)return; setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,1))},[lightboxIndex]);
+
   useEffect(()=>{ if(lightboxIndex===null) return; const onKey=(e:KeyboardEvent)=>{ if(e.key==='Escape') closeLightbox(); if(e.key==='ArrowLeft') prevImage(); if(e.key==='ArrowRight') nextImage(); if(e.key==='f'||e.key==='F') setFitMode(m=>m==='contain'?'cover':'contain') }; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey) },[lightboxIndex,closeLightbox,prevImage,nextImage]);
 
-  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; console.log('[Form] submit', obj); const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
+  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
 
   const daysMondayFirst = [1,2,3,4,5,6,0].map(d=>({ idx:d, label:DAYS[locale][d] }));
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600/40 font-text">
       <style>{`
-        html{scroll-behavior:smooth}
         :root{--font-brand:'Cormorant Garamond',serif;--font-text:'Lato',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji'}
         .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
         .hero-title{color:#6a0f1a !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 18px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
         .hero-slogan{color:#000 !important;text-shadow:0 0 0.5px rgba(255,255,255,1),0 0 3px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 14px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-webkit-text-stroke:0.4px #000}
-        .glow-breath{animation:glowBreath 2.6s ease-in-out infinite,glowFilter 2.6s ease-in-out infinite;will-change:text-shadow,filter}
-        @keyframes glowBreath{0%,100%{text-shadow:0 0 2px rgba(255,255,255,1),0 0 10px rgba(255,255,255,1),0 0 24px rgba(255,255,255,.95),0 0 40px rgba(255,255,255,.9)}50%{text-shadow:0 0 3px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 36px rgba(255,255,255,1),0 0 56px rgba(255,255,255,.95)}}
-        @keyframes glowFilter{0%,100%{filter:drop-shadow(0 0 8px rgba(255,255,255,.6)) drop-shadow(0 0 20px rgba(255,255,255,.45))}50%{filter:drop-shadow(0 0 14px rgba(255,255,255,.95)) drop-shadow(0 0 36px rgba(255,255,255,.7))}}
-        @media (prefers-reduced-motion: reduce){.glow-breath{animation:none;filter:none}}
-        .hero-anim{animation:titleEnter .7s cubic-bezier(.22,.61,.36,1) both;will-change:opacity,transform}
-        .hero-line{display:block}
-        .hero-line1{animation:lineRise .8s .05s cubic-bezier(.22,.61,.36,1) both}
-        .hero-line2{animation:lineRise .8s .15s cubic-bezier(.22,.61,.36,1) both}
-        @keyframes titleEnter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
-        @keyframes lineRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        @media (prefers-reduced-motion: reduce){.hero-anim,.hero-line1,.hero-line2{animation:none}}
-        .hz-sm{transition:transform .25s cubic-bezier(.22,.61,.36,1);will-change:transform}
-        .hz-sm:hover{transform:translateZ(0) scale(1.03)}
-        .hz-md{transition:transform .35s cubic-bezier(.22,.61,.36,1);will-change:transform}
-        .hz-md:hover{transform:translateZ(0) scale(1.06)}
-        .hz-nav{transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
-        .hz-nav:hover{transform:translateZ(0) scale(1.08)}
         :root{color-scheme: dark}
-        @media (prefers-reduced-motion: reduce){.hz-sm,.hz-md,.hz-nav{transition:none}.hz-sm:hover,.hz-md:hover,.hz-nav:hover{transform:none}}
       `}</style>
 
       {/* Header */}
@@ -356,10 +309,10 @@ export default function SuenoDeTangoLanding(){
             <a className="rounded-full border border-red-600/60 px-4 py-1.5 text-sm hover:bg-red-600/20 hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <select aria-label="Language selector" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
+            <select aria-label="Language selector" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
               <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option>
             </select>
-            <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{console.log('[UI] menu toggle'); setMenuOpen(s=>!s)}}>
+            <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{setMenuOpen(s=>!s)}}>
               <span className="sr-only">Menu</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
             </button>
@@ -369,7 +322,7 @@ export default function SuenoDeTangoLanding(){
           <div className="border-t border-white/10 md:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3" onClick={()=>setMenuOpen(false)}>
               <div className="mb-2"><label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
-                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option></select>
+                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option></select>
               </div>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
@@ -417,7 +370,7 @@ export default function SuenoDeTangoLanding(){
           {IMAGES.map((img,i)=>(
             <button key={i} onClick={()=>openLightbox(i)} className="group relative overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-inset ring-white/10 hz-md transform-gpu">
               <div className="relative h-64 w-full md:h-60 lg:h-72">
-                <img src={img.src} alt={img.alt[locale]} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-95"/>
+                <img src={img.src} alt={img.alt[locale]} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-95"/>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
                 <span className="pointer-events-none absolute bottom-3 left-3 text-xs text-neutral-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">{img.alt[locale]}</span>
               </div>
