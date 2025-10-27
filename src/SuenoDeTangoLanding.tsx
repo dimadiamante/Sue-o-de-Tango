@@ -260,9 +260,12 @@ export default function SuenoDeTangoLanding(){
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
 
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
+  useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
 
   // Google Fonts
   useEffect(()=>{
+    if (document.querySelector('link[data-gf]')) return;
+    if (document.querySelector('link[data-local-favicon]')) return;
     const links: HTMLLinkElement[] = [];
     const pre1 = document.createElement('link'); pre1.rel='preconnect'; pre1.href='https://fonts.googleapis.com'; pre1.setAttribute('data-gf',''); document.head.appendChild(pre1); links.push(pre1);
     const pre2 = document.createElement('link'); pre2.rel='preconnect'; pre2.href='https://fonts.gstatic.com'; pre2.crossOrigin='anonymous'; pre2.setAttribute('data-gf',''); document.head.appendChild(pre2); links.push(pre2);
@@ -290,13 +293,23 @@ export default function SuenoDeTangoLanding(){
     return ()=>{ links.forEach(l=> l.remove()); };
   },[]);
 
+  // App CSS + Hero preload (guarded)
+  useEffect(()=>{
+    if (!document.querySelector('link[data-app-css]')) {
+      const l = document.createElement('link'); l.rel='stylesheet'; l.href=BASE_URL+'styles/app.css'; l.setAttribute('data-app-css',''); document.head.appendChild(l);
+    }
+    if (!document.querySelector('link[data-preload-hero]')) {
+      const l=document.createElement('link'); l.rel='preload'; l.as='image'; l.href=HERO_BANNER; l.setAttribute('data-preload-hero',''); document.head.appendChild(l);
+    }
+  },[]);
+
   const openLightbox=useCallback((i:number)=>{console.log('[LB] open', i); setLightboxIndex(i)},[]);
   const closeLightbox=useCallback(()=>{console.log('[LB] close'); setLightboxIndex(null)},[]);
   const prevImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] prev'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,-1))},[lightboxIndex]);
   const nextImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] next'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,1))},[lightboxIndex]);
 
   useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
-  useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(lightboxIndex===null)return; if(e.key==='Escape')closeLightbox(); if(e.key==='ArrowLeft')prevImage(); if(e.key==='ArrowRight')nextImage(); if(e.key==='f'||e.key==='F') setFitMode(m=>m==='contain'?'cover':'contain')}; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey)},[lightboxIndex,closeLightbox,prevImage,nextImage]);
+  useEffect(()=>{ if(lightboxIndex===null) return; const onKey=(e:KeyboardEvent)=>{ if(e.key==='Escape') closeLightbox(); if(e.key==='ArrowLeft') prevImage(); if(e.key==='ArrowRight') nextImage(); if(e.key==='f'||e.key==='F') setFitMode(m=>m==='contain'?'cover':'contain') }; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey) },[lightboxIndex,closeLightbox,prevImage,nextImage]);
 
   const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; console.log('[Form] submit', obj); const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
 
@@ -375,7 +388,7 @@ export default function SuenoDeTangoLanding(){
             src={HERO_BANNER}
             alt={IMAGES[0].alt[locale]}
             className="h-full w-full object-cover opacity-70"
-            loading="eager"
+            loading="eager" decoding="async" fetchpriority="high" width={2000} height={1200}
             onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
