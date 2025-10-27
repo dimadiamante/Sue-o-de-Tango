@@ -162,6 +162,7 @@ const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.webp 800w, ${BASE_URL}images
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.webp`;
 const CTA_BG_SIZES = '100vw';
 
+
 // Google Maps location
 const MAPS_URL = 'https://maps.app.goo.gl/Xe1dM73d6raCRfNU7';
 
@@ -254,7 +255,11 @@ export default function SuenoDeTangoLanding(){
       const css = document.createElement('link'); css.rel='stylesheet'; css.href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,100..900;1,100..900&display=swap'; css.setAttribute('data-gf',''); document.head.appendChild(css);
     }
     if (!document.querySelector('link[data-app-css]')) {
-      const l = document.createElement('link'); l.rel='stylesheet'; l.href=BASE_URL+'styles/app.css'; l.setAttribute('data-app-css',''); document.head.appendChild(l);
+      const l = document.createElement('link');
+      l.rel='stylesheet';
+      l.href=BASE_URL+'styles/app.css';
+      l.setAttribute('data-app-css','');
+      document.head.appendChild(l);
     }
     if (!document.querySelector('link[data-preload-hero]')) {
       const l=document.createElement('link'); l.rel='preload'; l.as='image'; l.href=HERO_BANNER; l.setAttribute('data-preload-hero',''); document.head.appendChild(l);
@@ -349,7 +354,6 @@ export default function SuenoDeTangoLanding(){
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
           <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim glow-breath">
             <span className="hero-line hero-line1">Sueño</span>
-            <br />
             <span className="hero-line hero-line2">de Tango</span>
           </h1>
           <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left glow-breath">{t.hero.slogan}</p>
