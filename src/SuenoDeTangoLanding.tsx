@@ -5,7 +5,7 @@ import React, { useEffect, useState, useCallback } from "react";
 // Fonts: Cormorant Garamond (brand) + Lato (text)
 
 // -----------------------------
-// Types & locales
+// Types & locales 
 // -----------------------------
 
 type Locale = 'en' | 'ro' | 'ru' | 'fr';
