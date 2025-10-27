@@ -35,10 +35,3 @@ html{scroll-behavior:smooth}
 .hz-nav{transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
 .hz-nav:hover{transform:translateZ(0) scale(1.08)}
 
-body.has-site-bg{
-  background-image: linear-gradient(rgba(0,0,0,.94), rgba(0,0,0,.94)), var(--site-bg-url);
-  background-repeat: repeat;
-  background-size: 900px auto;
-  background-position: top center;
-  background-attachment: fixed;
-}
