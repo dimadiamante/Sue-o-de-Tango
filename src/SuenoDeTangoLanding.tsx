@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 // Sueño de Tango — Variant 6 (compact, optimized)
 // RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
@@ -243,7 +243,6 @@ export default function SuenoDeTangoLanding(){
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
 
-  // measure hero height for site-wide background offset
   const heroRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
@@ -268,17 +267,15 @@ export default function SuenoDeTangoLanding(){
     }
   },[]);
 
-  // Compute CSS var for hero height so the repeating site background starts BELOW the banner
+  // Site-wide repeating background (body)
   useEffect(()=>{
-    const updateHeroH = ()=>{
-      const h = heroRef.current?.offsetHeight || 0;
-      try { document.documentElement.style.setProperty('--hero-h', `${h}px`); } catch {}
+    try{
+      document.body.classList.add('has-site-bg');
+      document.body.style.setProperty('--site-bg-url', `url(${CTA_BG_DEFAULT})`);
+    }catch{}
+    return ()=>{
+      try{ document.body.classList.remove('has-site-bg'); document.body.style.removeProperty('--site-bg-url'); }catch{}
     };
-    updateHeroH();
-    window.addEventListener('resize', updateHeroH);
-    const obs = new ResizeObserver(updateHeroH);
-    if (heroRef.current) obs.observe(heroRef.current);
-    return ()=>{ window.removeEventListener('resize', updateHeroH); obs.disconnect(); };
   },[]);
 
   // Favicons (local files, no external links)
@@ -347,7 +344,7 @@ export default function SuenoDeTangoLanding(){
       </header>
 
       {/* Hero */}
-      <section id="hero" ref={heroRef} className="relative isolate">
+      <section id="hero" className="relative isolate">
         <div className="absolute inset-0 z-0 overflow-hidden bg-neutral-950">
           <img
             src={HERO_BANNER}
@@ -371,19 +368,6 @@ export default function SuenoDeTangoLanding(){
           </div>
         </div>
       </section>
-
-      {/* Site-wide repeating background below hero */}
-      <div
-        className="fixed inset-x-0 bottom-0 -z-10 pointer-events-none"
-        style={{
-          top: 'var(--hero-h, 0px)',
-          backgroundImage: `url(${CTA_BG_DEFAULT})`,
-          backgroundRepeat: 'repeat',
-          backgroundPosition: 'top center',
-          backgroundSize: '900px auto',
-          opacity: 0.08
-        }}
-      />
 
       {/* Gallery */}
       <section id="gallery" aria-label={t.nav.gallery} className="mx-auto max-w-7xl px-4 py-16">
@@ -563,4 +547,52 @@ export default function SuenoDeTangoLanding(){
       </footer>
     </div>
   );
+}
+
+/* === Global theme & fonts === */
+:root{
+  --font-brand:'Cormorant Garamond',serif;
+  --font-text:'Lato',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji';
+  color-scheme: dark;
+}
+.font-brand{font-family:var(--font-brand)}
+.font-text{font-family:var(--font-text)}
+
+/* === Hero typography (moved from inline) === */
+.hero-title{
+  color:#6a0f1a !important;
+  text-shadow:
+    0 0 2px rgba(255,255,255,1),
+    0 0 8px rgba(255,255,255,.98),
+    0 0 18px rgba(255,255,255,.9) !important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.hero-slogan{
+  color:#000 !important;
+  text-shadow:
+    0 0 0.5px rgba(255,255,255,1),
+    0 0 3px rgba(255,255,255,1),
+    0 0 8px rgba(255,255,255,.98),
+    0 0 14px rgba(255,255,255,.9) !important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  -webkit-text-stroke:0.4px #000;
+}
+
+/* === CTA background filter === */
+.cta-image{ filter: brightness(1.16) saturate(1.06) contrast(1.04); }
+
+/* === Lightbox sizing === */
+.lb-wrap{ max-height:92vh }
+.lb-img{ max-height:92vh; max-width:min(96vw,1600px) }
+
+/* === Site-wide repeating background below hero === */
+body.has-site-bg{
+  /* very transparent pattern via dark overlay */
+  background-image: linear-gradient(rgba(0,0,0,0.94), rgba(0,0,0,0.94)), var(--site-bg-url);
+  background-repeat: repeat;
+  background-size: 900px auto; /* tile size */
+  background-position: top center;
+  background-attachment: fixed;
 }
