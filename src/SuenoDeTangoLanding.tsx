@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 
 // Sueño de Tango — Variant 6 (compact, optimized)
 // RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
@@ -73,7 +73,7 @@ const I18N = {
       rooms:{roomA:'Sala A',roomB:'Sala B',mainHall:'Sala principală'}
     },
     about:{
-      title:'Despre școală', p1:'Predăm tango argentinian autentic: de la primii pași la nuanțe profunde ale improvizației.', p2:'Acordăm atenție muzicalității, axei, calității abrazo și culturii de sală.',
+      title:'Despre școală', p1:'Predăm tango argentinian autentic: de la primii pași la nuanțe profunde ale improvizației.', p2:'Acordăm atenție muzicalității, axei, calității abraço și culturii de sală.',
       bullets:['Grupe pentru toate nivelurile','Practice regulate și milongi','Lecții private și intensive'],
       whyTitle:'De ce „Sueño de Tango”', whyText:'Filosofia noastră vizuală — contrastul dintre lumină și umbră, unde fiecare pauză și pivot se citesc ca un cadru de film. Construim dansul ca dialog și te invităm în această poveste.', join:'Alătură-te', ask:'Pune o întrebare'
     },
@@ -185,6 +185,34 @@ const ALT = {
 const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i],fr:ALT.fr[i]}}));
 
 // -----------------------------
+// Helpers & sanity tests
+// -----------------------------
+
+function wrapIndex(len:number,index:number,delta:number){return (index+delta+len)%len}
+
+function chooseFitMode(imgAR:number, vpAR:number): 'contain' | 'cover' {
+  // Prefer cover when aspect ratios are close to maximize screen usage, contain otherwise to avoid heavy cropping
+  const diff = Math.abs(imgAR - vpAR) / vpAR;
+  return diff <= 0.18 ? 'cover' : 'contain';
+}
+
+function runSanityChecks(){
+  const group=(name:string)=>{try{console.groupCollapsed?.(`[SANITY] ${name}`)}catch{};return()=>{try{console.groupEnd?.()}catch{}}};
+  const LOCALES = Object.keys(I18N) as Locale[];
+
+  let end=group('DAYS length = 7 for all locales'); const badDays=Object.entries(DAYS).filter(([,a])=>a.length!==7); badDays.length?console.error('[SANITY] DAYS invalid',badDays):console.log('[SANITY] OK'); end();
+
+  end=group('wrapIndex boundaries'); const L=IMAGES.length,t1=wrapIndex(L,0,-1)===L-1,t2=wrapIndex(L,L-1,1)===0,t3=wrapIndex(L,2,-3)===L-1; !(t1&&t2&&t3)?console.error('[SANITY] wrapIndex failed',{t1,t2,t3,L}):console.log('[SANITY] OK'); end();
+
+  end=group('Images alt per locale'); const miss: Array<{idx:number;missing:Locale[]}> = []; IMAGES.forEach((img,i)=>{const m:Locale[]=[]; LOCALES.forEach(Lc=>{if(!img.alt[Lc])m.push(Lc)}); if(m.length)miss.push({idx:i,missing:m})}); miss.length?console.error('[SANITY] Missing alts',miss):console.log('[SANITY] OK'); end();
+
+  end=group('Gallery file extensions are .webp'); const wrongExt=GALLERY_FILES.filter(f=>!f.endsWith('.webp')); wrongExt.length?console.error('[SANITY] Non-webp images',wrongExt):console.log('[SANITY] OK'); end();
+
+  end=group('Hero assets are .webp'); const heroOk=HERO_BANNER.endsWith('.webp')&&FALLBACK_HERO.endsWith('.webp'); !heroOk?console.error('[SANITY] Hero not webp'):
+  console.log('[SANITY] OK'); end();
+}
+
+// -----------------------------
 // Schedule (Monday‑first UI)
 // -----------------------------
 
@@ -202,40 +230,6 @@ const SCHEDULE: ScheduleItem[] = [
 const WEEK_ORDER = [1,2,3,4,5,6,0];
 
 // -----------------------------
-// Utils & Sanity tests (act like lightweight test cases)
-// -----------------------------
-
-function wrapIndex(len:number,index:number,delta:number){return (index+delta+len)%len}
-
-function runSanityChecks(){
-  const group=(name:string)=>{try{console.groupCollapsed?.(`[SANITY] ${name}`)}catch{};return()=>{try{console.groupEnd?.()}catch{}}};
-  const LOCALES = Object.keys(I18N) as Locale[];
-
-  let end=group('DAYS length = 7 for all locales'); const badDays=Object.entries(DAYS).filter(([,a])=>a.length!==7); badDays.length?console.error('[SANITY] DAYS invalid',badDays):console.log('[SANITY] OK'); end();
-
-  end=group('Schedule dayIndex within range'); const oor=SCHEDULE.filter(s=>s.dayIndex<0||s.dayIndex>6); oor.length?console.error('[SANITY] dayIndex out of range',oor):console.log('[SANITY] OK'); end();
-
-  end=group('wrapIndex boundaries'); const L=IMAGES.length,t1=wrapIndex(L,0,-1)===L-1,t2=wrapIndex(L,L-1,1)===0,t3=wrapIndex(L,2,-3)===L-1; !(t1&&t2&&t3)?console.error('[SANITY] wrapIndex failed',{t1,t2,t3,L}):console.log('[SANITY] OK'); end();
-
-  end=group('Images alt per locale'); const miss: Array<{idx:number;missing:Locale[]}> = []; IMAGES.forEach((img,i)=>{const m:Locale[]=[]; LOCALES.forEach(Lc=>{if(!img.alt[Lc])m.push(Lc)}); if(m.length)miss.push({idx:i,missing:m})}); miss.length?console.error('[SANITY] Missing alts',miss):console.log('[SANITY] OK'); end();
-
-  end=group('Schedule keys present in I18N'); const missing:any[]=[]; SCHEDULE.forEach((s,i)=>{LOCALES.forEach(Lc=>{const tt=I18N[Lc].schedule; if(!tt.titles[s.titleKey])missing.push({i,Lc,key:s.titleKey,type:'title'}); if(!tt.levels[s.levelKey])missing.push({i,Lc,key:s.levelKey,type:'level'}); if(!tt.rooms[s.roomKey])missing.push({i,Lc,key:s.roomKey,type:'room'})})}); missing.length?console.error('[SANITY] Missing schedule translations',missing):console.log('[SANITY] OK'); end();
-
-  end=group('WEEK_ORDER Monday-first'); const isPerm=WEEK_ORDER.slice().sort().every((v,i)=>v===i); !(WEEK_ORDER[0]===1&&WEEK_ORDER[6]===0&&isPerm)?console.error('[SANITY] WEEK_ORDER invalid',WEEK_ORDER):console.log('[SANITY] OK: Monday-first'); end();
-
-  end=group('Schedule time 24h format'); const re=/^([01]\d|2[0-3]):[0-5]\d–([01]\d|2[0-3]):[0-5]\d$/; const badTimes=SCHEDULE.filter(s=>!re.test(s.time)); badTimes.length?console.error('[SANITY] Bad time format',badTimes):console.log('[SANITY] OK'); end();
-
-  end=group('Exactly one EN DASH in each time'); const split=SCHEDULE.filter(s=>s.time.split('–').length!==2); split.length?console.error('[SANITY] Multiple or missing EN DASH',split):console.log('[SANITY] OK'); end();
-
-  end=group('CTA srcset sanity'); const ok=['800w','1200w','1600w','2000w'].every(k=>CTA_BG_SRCSET.includes(k)); !ok?console.error('[SANITY] CTA_BG_SRCSET missing sizes'):console.log('[SANITY] OK'); end();
-
-  // Extra: assets expectations
-  end=group('Gallery file extensions are .webp'); const wrongExt=GALLERY_FILES.filter(f=>!f.endsWith('.webp')); wrongExt.length?console.error('[SANITY] Non-webp images',wrongExt):console.log('[SANITY] OK'); end();
-  end=group('Hero assets are .webp'); const heroOk=HERO_BANNER.endsWith('.webp')&&FALLBACK_HERO.endsWith('.webp'); !heroOk?console.error('[SANITY] Hero not webp'):
-  console.log('[SANITY] OK'); end();
-}
-
-// -----------------------------
 // Component
 // -----------------------------
 
@@ -247,6 +241,7 @@ export default function SuenoDeTangoLanding(){
   const t=I18N[locale];
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
+  const imgRef = useRef<HTMLImageElement|null>(null);
 
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
@@ -291,6 +286,22 @@ export default function SuenoDeTangoLanding(){
   const nextImage=useCallback(()=>{if(lightboxIndex===null)return; setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,1))},[lightboxIndex]);
 
   useEffect(()=>{ if(lightboxIndex===null) return; const onKey=(e:KeyboardEvent)=>{ if(e.key==='Escape') closeLightbox(); if(e.key==='ArrowLeft') prevImage(); if(e.key==='ArrowRight') nextImage(); if(e.key==='f'||e.key==='F') setFitMode(m=>m==='contain'?'cover':'contain') }; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey) },[lightboxIndex,closeLightbox,prevImage,nextImage]);
+
+  // Recalculate fit on resize/orientation while lightbox open
+  useEffect(()=>{
+    if(lightboxIndex===null) return;
+    const onResize = () => {
+      const img = imgRef.current; if(!img) return;
+      const vw = Math.min(window.innerWidth, window.innerHeight * (16/9) * 9/16 * 1000); // harmless cap replacement
+      const vh = window.innerHeight * 0.92;
+      const vp = (Math.max(320, Math.min(window.innerWidth, window.innerHeight*2))) / vh; // guard
+      const ar = (img.naturalWidth||1)/(img.naturalHeight||1);
+      setFitMode(chooseFitMode(ar, vp));
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    return ()=>{ window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize); };
+  },[lightboxIndex]);
 
   const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
 
@@ -514,15 +525,16 @@ export default function SuenoDeTangoLanding(){
               <path d="M9 6l6 6-6 6" />
             </svg>
           </button>
-          <div className="w-[min(96vw,1600px)] lb-wrap">
+          <div className="lb-frame relative w-[96vw] h-[92dvh] max-h-[92vh] flex items-center justify-center">
             <img
+              ref={imgRef}
               src={IMAGES[lightboxIndex].src}
               alt={IMAGES[lightboxIndex].alt[locale]}
-              className={"lb-img rounded-2xl shadow-2xl ring-1 ring-white/10 "+(fitMode==='cover'?'object-cover':'object-contain')}
-              onLoad={(e)=>{ const img=e.currentTarget; const vw=Math.min(window.innerWidth,1600); const vh=window.innerHeight*0.92; const vp=vw/vh; const ar=img.naturalWidth/img.naturalHeight; const mode=((Math.abs(ar - vp)/vp) <= 0.12)?'cover':'contain'; setFitMode(mode as 'contain'|'cover'); }}
+              className={"lb-img rounded-2xl shadow-2xl ring-1 ring-white/10 transition-transform "+(fitMode==='cover'?'w-full h-full object-cover':'max-w-full max-h-[92dvh] w-auto h-auto object-contain')}
+              onLoad={(e)=>{ const img=e.currentTarget; const vw=Math.min(window.innerWidth, Number.MAX_SAFE_INTEGER); const vh=window.innerHeight*0.92; const vp=vw/vh; const ar=(img.naturalWidth||1)/(img.naturalHeight||1); setFitMode(chooseFitMode(ar,vp)); }}
               onDoubleClick={()=> setFitMode(m=>m==='contain'?'cover':'contain')}
             />
-            <p className="mt-3 text-center text-sm text-neutral-300">{IMAGES[lightboxIndex].alt[locale]}</p>
+            <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-center text-sm text-neutral-300">{IMAGES[lightboxIndex].alt[locale]}</p>
           </div>
         </div>
       )}
