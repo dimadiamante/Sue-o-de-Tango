@@ -9,7 +9,7 @@ import React, { useEffect, useState, useCallback } from "react";
 // Types & locales
 // -----------------------------
 
-type Locale = 'en' | 'ro' | 'ru';
+type Locale = 'en' | 'ro' | 'ru' | 'fr';
 
 type TitleKey = 'basicCourse'|'musicalityImprovisation'|'techniqueAxisPivots'|'partnerWorkAbrazo'|'tangoVals'|'practicaMilonga'|'intensiveVals'|'bootcampFromScratch';
 
@@ -20,7 +20,8 @@ type RoomKey = 'roomA'|'roomB'|'mainHall';
 const DAYS: Record<Locale,string[]> = {
   en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
   ro:['Du','Lu','Ma','Mi','Jo','Vi','Sâ'],
-  ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']
+  ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+  fr:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']
 };
 
 const I18N = {
@@ -113,6 +114,36 @@ const I18N = {
       alert:'Спасибо! Мы свяжемся с вами в ближайшее время.'
     },
     lightbox:{close:'Закрыть',prev:'Назад',next:'Вперёд'}
+  },
+  fr:{
+    siteTitle:'Sueño de Tango',
+    nav:{gallery:'Galerie',schedule:'Horaires',about:'À propos',join:'Rejoindre',contact:'S’inscrire'},
+    hero:{
+      title:'Sueño de Tango', slogan:'El arte del encuentro',
+      subtitle:"Sueño de Tango est un espace où le tango devient une manière de ressentir, pas seulement de bouger. Ici, le contact, la respiration et le silence entre les pas comptent ; la technique n’est qu’un moyen d’exprimer ce qui est à l’intérieur. Ce n’est pas seulement une école — c’est une atmosphère de rencontre, de rêve et de profondeur.",
+      ctaTrial:'Réserver une leçon d’essai', ctaGallery:'Voir la galerie'
+    },
+    gallery:{title:'Galerie',intro:'Lumière en contraste, pauses vivantes et souffle de la danse. Cliquez sur une photo pour l’ouvrir en plein écran.'},
+    schedule:{
+      title:'Horaires', intro:'Choisissez un jour de la semaine pour voir les cours et les événements.', note:'* L’horaire peut changer. Merci de confirmer avant la visite.', cta:'Demander / S’inscrire',
+      titles:{
+        basicCourse:'Cours de base', musicalityImprovisation:'Musicalité & Improvisation', techniqueAxisPivots:'Technique : axe & pivots', partnerWorkAbrazo:'Travail en couple : abrazo', tangoVals:'Tango‑Vals', practicaMilonga:'Pratique / Milonga', intensiveVals:'Intensif : Vals', bootcampFromScratch:'Bootcamp depuis zéro'
+      },
+      levels:{beginners:'Débutants',improvers:'Intermédiaires',allLevels:'Tous niveaux',mixedBegImp:'Débutants/Intermédiaires',intermediatePlus:'Intermédiaire+',open:'Ouvert'},
+      rooms:{roomA:'Salle A',roomB:'Salle B',mainHall:'Grande salle'}
+    },
+    about:{
+      title:'À propos de l’école', p1:'Nous enseignons le tango argentin authentique : des premiers pas aux nuances profondes de l’improvisation.', p2:'Nous accordons une attention particulière à la musicalité, à l’axe, à la qualité de l’abrazo et à la culture de la piste.',
+      bullets:['Groupes pour tous niveaux','Pratiques régulières et milongas','Cours particuliers et stages intensifs'],
+      whyTitle:'Pourquoi « Sueño de Tango »', whyText:'Notre philosophie visuelle — le contraste entre la lumière et l’ombre, où chaque pause et pivot se lit comme un plan de cinéma. Nous construisons la danse comme un dialogue et vous invitons dans cette histoire.', join:'Rejoindre', ask:'Poser une question'
+    },
+    cta:{title:'Prêt pour le premier pas ?',text:'Réservez une leçon d’essai — nous trouverons un niveau et un partenariat confortables.',btn:'S’inscrire'},
+    contact:{
+      title:'Contact',intro:'Nous sommes au centre-ville. Écrivez‑nous ou laissez une demande.', addressLabel:'Adresse',address:'Strada Vlaicu Vodă 7, București', phoneLabel:'Téléphone', instagram:'Instagram', emailLabel:'E‑mail',
+      form:{title:'Envoyer une demande',name:'Nom',phone:'Téléphone',email:'E‑mail',level:'Niveau',levels:['Débutants','Intermédiaires','Intermédiaire / Avancé','Cours particuliers'],message:'Message',messagePh:'Posez une question ou indiquez l’horaire qui vous convient',submit:'Envoyer',consent:'En envoyant, vous acceptez le traitement des données.'},
+      alert:'Merci ! Nous vous contacterons bientôt.'
+    },
+    lightbox:{close:'Fermer',prev:'Précédent',next:'Suivant'}
   }
 } as const;
 
@@ -152,9 +183,10 @@ const IMG_SRC = GALLERY_FILES.map(f => BASE_URL + 'images/' + f);
 const ALT = {
   en:['Silhouette couple in dramatic light','Close‑up tango steps','Abrazo in backlight','Pivot with torso twist','Couple on an empty stage','Dancers’ shoes details'],
   ro:['Siluetă de cuplu în lumină dramatică','Prim‑plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte'],
-  ru:['Силуэт пары в драматичном свете','Крупный план шагов танго','Абразо на контровом свете','Пивот с разворотом корпуса','Пара на пустой сцене','Детали танцевальной обуви']
+  ru:['Силуэт пары в драматичном свете','Крупный план шагов танго','Абразо на контровом свете','Пивот с разворотом корпуса','Пара на пустой сцене','Детали танцевальной обуви'],
+  fr:['Silhouette d’un couple en lumière dramatique','Gros plan des pas de tango','Abrazo à contre‑jour','Pivot avec torsion du buste','Couple sur une scène vide','Détails des chaussures des danseurs']
 };
-const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i]}}));
+const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i],fr:ALT.fr[i]}}));
 
 // -----------------------------
 // Schedule (Monday‑first UI)
@@ -230,7 +262,7 @@ export default function SuenoDeTangoLanding(){
   const [menuOpen,setMenuOpen]=useState(false);
   const [lightboxIndex,setLightboxIndex]=useState<number|null>(null);
   const [fitMode,setFitMode]=useState<'contain'|'cover'>('contain');
-  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru'] as Locale[]).includes(s))?s:'ro'});
+  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru','fr'] as Locale[]).includes(s))?s:'ro'});
   const t=I18N[locale];
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
@@ -320,7 +352,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
           </nav>
           <div className="flex items-center gap-2">
             <select aria-label="Language selector" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
-              <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option>
+              <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option>
             </select>
             <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{console.log('[UI] menu toggle'); setMenuOpen(s=>!s)}}>
               <span className="sr-only">Menu</span>
@@ -332,7 +364,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
           <div className="border-t border-white/10 md:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3" onClick={()=>setMenuOpen(false)}>
               <div className="mb-2"><label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
-                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option></select>
+                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option></select>
               </div>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
