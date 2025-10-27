@@ -341,7 +341,7 @@ export default function SuenoDeTangoLanding(){
           <img
             src={HERO_BANNER}
             alt={IMAGES[0].alt[locale]}
-            className="h-full w-full object-contain opacity-70"
+            className=\"h-full w-full object-cover opacity-70\"
             loading="eager" decoding="async" fetchPriority="high" width={2000} height={1200}
             onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
           />
