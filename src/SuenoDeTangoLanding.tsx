@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-// Sueño de Tango — Variant 6 (compact, fixed)
-// RO default, EN supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
-// Fonts: Cormorant Garamond (brand) + Lato (text)
-// HERO uses background video with poster; safe fallback to image if video fails
+// Sueño de Tango — Variant 6 (restored full structure)
+// RO default, EN/RU supported, 24‑hour time, Monday‑first week, gallery lightbox (auto‑fit), CTA, contact form, Google Fonts
 
 // -----------------------------
 // Types & locales
@@ -120,27 +118,21 @@ const I18N = {
 // Assets
 // -----------------------------
 
-// Base URL for GitHub Pages compatibility (Vite will inject /REPO_NAME/)
 const BASE_URL = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.BASE_URL) ? (import.meta as any).env.BASE_URL as string : '/';
 
-// Poster image already provided
 const HERO_BANNER_RAW = BASE_URL + "images/my-hero.webp";
 const HERO_BANNER = encodeURI(HERO_BANNER_RAW);
 const FALLBACK_HERO = BASE_URL + "images/fallback-hero.webp";
 
-// Video sources (local first, then optional CDN). If none work, we fall back to image silently.
-
 const CTA_BG_SRCSET = `${BASE_URL}images/cta-bg-800.webp 800w, ${BASE_URL}images/cta-bg-1200.webp 1200w, ${BASE_URL}images/cta-bg-1600.webp 1600w, ${BASE_URL}images/cta-bg-2000.webp 2000w`;
 const CTA_BG_DEFAULT = `${BASE_URL}images/cta-bg-1600.webp`;
-
 const CTA_BG_SIZES = '100vw';
 
 // Google Maps location
 const MAPS_URL = 'https://maps.app.goo.gl/Xe1dM73d6raCRfNU7';
 
-// Contact email for form submissions and mailto links
+// Contact
 const CONTACT_EMAIL = '7437976@gmail.com';
-// Contact phone
 const CONTACT_PHONE = '+40 749 901 534';
 const CONTACT_PHONE_TEL = '+40749901534';
 
@@ -212,14 +204,10 @@ function runSanityChecks(){
 
   end=group('Schedule title keys parity across locales'); const base=Object.keys(I18N.en.schedule.titles).sort(); const diffs=(Object.keys(I18N) as Locale[]).map(Lc=>{const k=Object.keys(I18N[Lc].schedule.titles).sort(); return {Lc, ok:k.length===base.length && k.every((v,i)=>v===base[i])};}).filter(x=>!x.ok); diffs.length?console.error('[SANITY] schedule.titles mismatch',diffs):console.log('[SANITY] OK'); end();
 
-  // TC15: Gallery ALT length matches IMG_SRC for all locales
-  end=group('ALT length matches IMG_SRC'); const eqLen = ALT.en.length===IMG_SRC.length && ALT.ro.length===IMG_SRC.length && ALT.ru.length===IMG_SRC.length;
+  end=group('ALT length matches IMG_SRC'); const eqLen = ALT.en.length===IMG_SRC.length && ALT.ro.length===IMG_SRC.length && ALT.ru.length===IMG_SRC.length; !eqLen?console.error('[SANITY] ALT length mismatch') : console.log('[SANITY] OK'); end();
 
-  // TC16: HERO constants are defined and non-empty
   end=group('HERO constants defined'); const okHero = [HERO_BANNER_RAW,HERO_BANNER,FALLBACK_HERO].every(v=>typeof v==='string' && v.length>0); !okHero?console.error('[SANITY] HERO consts missing') : console.log('[SANITY] OK'); end();
 
-  // TC17: Video sources sanity — strings with types
-  // TC18: BASE_URL applied to banner
   end=group('BASE_URL applied'); const okBase = HERO_BANNER_RAW.startsWith(BASE_URL); !okBase?console.error('[SANITY] BASE_URL not applied',{BASE_URL,HERO_BANNER_RAW}):console.log('[SANITY] OK'); end();
 }
 
@@ -236,53 +224,34 @@ export default function SuenoDeTangoLanding(){
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
 
-      
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
+
+  // Google Fonts
   useEffect(()=>{
     const links: HTMLLinkElement[] = [];
-    const pre1 = document.createElement('link');
-    pre1.rel = 'preconnect';
-    pre1.href = 'https://fonts.googleapis.com';
-    pre1.setAttribute('data-gf','');
-    document.head.appendChild(pre1); links.push(pre1);
-
-    const pre2 = document.createElement('link');
-    pre2.rel = 'preconnect';
-    pre2.href = 'https://fonts.gstatic.com';
-    pre2.crossOrigin = 'anonymous';
-    pre2.setAttribute('data-gf','');
-    document.head.appendChild(pre2); links.push(pre2);
-
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,100..900;1,100..900&display=swap';
-    css.setAttribute('data-gf','');
-    document.head.appendChild(css); links.push(css);
-
+    const pre1 = document.createElement('link'); pre1.rel='preconnect'; pre1.href='https://fonts.googleapis.com'; pre1.setAttribute('data-gf',''); document.head.appendChild(pre1); links.push(pre1);
+    const pre2 = document.createElement('link'); pre2.rel='preconnect'; pre2.href='https://fonts.gstatic.com'; pre2.crossOrigin='anonymous'; pre2.setAttribute('data-gf',''); document.head.appendChild(pre2); links.push(pre2);
+    const css = document.createElement('link'); css.rel='stylesheet'; css.href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,100..900;1,100..900&display=swap'; css.setAttribute('data-gf',''); document.head.appendChild(css); links.push(css);
     console.log('[Fonts] Google Fonts injected', css.href);
     return ()=>{ links.forEach(l=> l.remove()); };
   },[]);
 
-  const openLightbox=useCallback((i:number)=>{console.log('[LB] open', i); setLightboxIndex(i)},[]);
-  const closeLightbox=useCallback(()=>{console.log('[LB] close'); setLightboxIndex(null)},[]);
-  const prevImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] prev'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,-1))},[lightboxIndex]);
-  const nextImage=useCallback(()=>{if(lightboxIndex===null)return; console.log('[LB] next'); setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,1))},[lightboxIndex]);
+  const openLightbox=useCallback((i:number)=>{setLightboxIndex(i)},[]);
+  const closeLightbox=useCallback(()=>{setLightboxIndex(null)},[]);
+  const prevImage=useCallback(()=>{if(lightboxIndex===null)return; setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,-1))},[lightboxIndex]);
+  const nextImage=useCallback(()=>{if(lightboxIndex===null)return; setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,1))},[lightboxIndex]);
 
-  useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
+  useEffect(()=>{runSanityChecks()},[]);
   useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(lightboxIndex===null)return; if(e.key==='Escape')closeLightbox(); if(e.key==='ArrowLeft')prevImage(); if(e.key==='ArrowRight')nextImage(); if(e.key==='f'||e.key==='F') setFitMode(m=>m==='contain'?'cover':'contain')}; window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey)},[lightboxIndex,closeLightbox,prevImage,nextImage]);
 
-  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; console.log('[Form] submit', obj); const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}
-Phone: ${obj.phone||''}
-Email: ${obj.email||''}
-Level: ${obj.level||''}
-Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
+  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch{} alert(t.contact.alert); f.reset();};
+
+  const daysMondayFirst = WEEK_ORDER.map(d=>({ idx:d, label:DAYS[locale][d] }));
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600/40 font-text">
       <style>{`
         html{scroll-behavior:smooth}
-        
-        
         :root{--font-brand:'Cormorant Garamond',serif;--font-text:'Lato',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji'}
         .font-brand{font-family:var(--font-brand)}.font-text{font-family:var(--font-text)}
         .hero-title{color:#6a0f1a !important;text-shadow:0 0 2px rgba(255,255,255,1),0 0 8px rgba(255,255,255,.98),0 0 18px rgba(255,255,255,.9) !important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
@@ -291,14 +260,12 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         @keyframes glowBreath{0%,100%{text-shadow:0 0 2px rgba(255,255,255,1),0 0 10px rgba(255,255,255,1),0 0 24px rgba(255,255,255,.95),0 0 40px rgba(255,255,255,.9)}50%{text-shadow:0 0 3px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 36px rgba(255,255,255,1),0 0 56px rgba(255,255,255,.95)}}
         @keyframes glowFilter{0%,100%{filter:drop-shadow(0 0 8px rgba(255,255,255,.6)) drop-shadow(0 0 20px rgba(255,255,255,.45))}50%{filter:drop-shadow(0 0 14px rgba(255,255,255,.95)) drop-shadow(0 0 36px rgba(255,255,255,.7))}}
         @media (prefers-reduced-motion: reduce){.glow-breath{animation:none;filter:none}}
-        /* Title entrance + staggered lines */
         .hero-anim{animation:titleEnter .7s cubic-bezier(.22,.61,.36,1) both;will-change:opacity,transform}
         .hero-line{display:block}
         .hero-line1{animation:lineRise .8s .05s cubic-bezier(.22,.61,.36,1) both}
         .hero-line2{animation:lineRise .8s .15s cubic-bezier(.22,.61,.36,1) both}
         @keyframes titleEnter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
         @keyframes lineRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        @media (prefers-reduced-motion: reduce){.hero-anim,.hero-line1,.hero-line2{animation:none}}
         .hz-sm{transition:transform .25s cubic-bezier(.22,.61,.36,1);will-change:transform}
         .hz-sm:hover{transform:translateZ(0) scale(1.03)}
         .hz-md{transition:transform .35s cubic-bezier(.22,.61,.36,1);will-change:transform}
@@ -320,10 +287,10 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
             <a className="rounded-full border border-red-600/60 px-4 py-1.5 text-sm hover:bg-red-600/20 hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <select aria-label="Language selector" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
+            <select aria-label="Language selector" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
               <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option>
             </select>
-            <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{console.log('[UI] menu toggle'); setMenuOpen(s=>!s)}}>
+            <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>setMenuOpen(s=>!s)}>
               <span className="sr-only">Menu</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
             </button>
@@ -333,7 +300,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
           <div className="border-t border-white/10 md:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3" onClick={()=>setMenuOpen(false)}>
               <div className="mb-2"><label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
-                <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; console.log('[i18n] change locale', locale, '->', v); setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option></select>
+                <select id="locale-sm" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm"><option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option></select>
               </div>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
               <a className="py-2 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
@@ -345,7 +312,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
         )}
       </header>
 
-      {/* Hero */}
+      {/* Hero (uses HERO_BANNER) */}
       <section id="hero" className="relative isolate">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
@@ -355,109 +322,112 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
             loading="eager"
             onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950"/>
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
         </div>
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
-          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim glow-breath">
+        <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-3 px-6 py-16">
+          <h1 className="hero-title hero-anim glow-breath max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left">
             <span className="hero-line hero-line1">Sueño</span>
             <span className="hero-line hero-line2">de Tango</span>
           </h1>
-          <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left glow-breath">{t.hero.slogan}</p>
-          <p className="max-w-xl text-neutral-300 md:text-lg">{t.hero.subtitle}</p>
-          <div className="flex flex-wrap gap-3 pt-2">
-            <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium tracking-wide hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
-            <a href="#gallery" className="rounded-2xl border border-white/20 px-5 py-3 text-sm hover:bg-white/10">{t.hero.ctaGallery}</a>
+          <p className="hero-slogan glow-breath font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left">{t.hero.slogan}</p>
+          <p className="mt-3 max-w-2xl text-neutral-300">{t.hero.subtitle}</p>
+          <div className="mt-5 flex gap-3">
+            <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
+            <a href="#gallery" className="rounded-2xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.hero.ctaGallery}</a>
           </div>
         </div>
       </section>
 
       {/* Gallery */}
-      <section id="gallery" aria-label={t.nav.gallery} className="mx-auto max-w-7xl px-4 py-16">
-        <header className="mb-8 flex items-end justify-between">
-          <div><h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2><p className="mt-2 max-w-2xl text-neutral-400">{t.gallery.intro}</p></div>
-          <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
-        </header>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {IMAGES.map((img,i)=>(
+      <section id="gallery" className="mx-auto max-w-7xl px-4 py-16">
+        <h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2>
+        <p className="mt-3 text-neutral-300">{t.gallery.intro}</p>
+        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+          {IMAGES.map((img,i)=> (
             <button key={i} onClick={()=>openLightbox(i)} className="group relative overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-inset ring-white/10 hz-md transform-gpu">
-              <div className="relative h-64 w-full md:h-60 lg:h-72">
-                <img src={img.src} alt={img.alt[locale]} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-95"/>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
-                <span className="pointer-events-none absolute bottom-3 left-3 text-xs text-neutral-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">{img.alt[locale]}</span>
-              </div>
+              <img src={img.src} alt={img.alt[locale]} loading="lazy" className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"/>
+              <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0 opacity-0 transition-opacity group-hover:opacity-100"/>
             </button>
           ))}
         </div>
       </section>
 
       {/* Schedule */}
-      <section id="schedule" aria-label={t.nav.schedule} className="mx-auto max-w-7xl px-4 py-16">
-        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div><h2 className="font-brand text-3xl md:text-4xl">{t.schedule.title}</h2><p className="mt-2 max-w-2xl text-neutral-400">{t.schedule.intro}</p></div>
-          <div role="tablist" aria-label="Weekdays" className="flex flex-wrap gap-2">
-            {WEEK_ORDER.map(dayIdx=> (
-              <button key={dayIdx} role="tab" aria-selected={activeDay===dayIdx} onClick={()=>{console.log('[Schedule] set activeDay', dayIdx); setActiveDay(dayIdx)}} className={`rounded-xl border px-3 py-1.5 text-sm transition ${activeDay===dayIdx?'border-red-500 bg-red-600/20':'border-white/10 bg-neutral-900 hover:bg-white/10'}`}>
-                {DAYS[locale][dayIdx]}
-              </button>
-            ))}
-          </div>
-        </header>
-        {SCHEDULE.filter(e=>e.dayIndex===activeDay).length===0? (
-          <div className="rounded-2xl border border-white/10 bg-neutral-900 p-6 text-neutral-300"><p className="mb-3">—</p><a href="#contact" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.schedule.cta}</a></div>
-        ):(
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {SCHEDULE.filter(e=>e.dayIndex===activeDay).map((e,i)=>(
-              <div key={i} className="rounded-2xl border border-white/10 bg-neutral-900 p-4 hz-sm transform-gpu">
-                <div className="flex items-center justify-between"><h3 className="text-lg font-semibold">{t.schedule.titles[e.titleKey]}</h3><span className="rounded-md border border-white/10 px-2 py-0.5 text-xs text-neutral-300">{t.schedule.levels[e.levelKey]}</span></div>
-                <p className="mt-1 text-neutral-300">{e.time}</p>
-                <p className="text-sm text-neutral-400">{e.teacher} • {t.schedule.rooms[e.roomKey]}</p>
+      <section id="schedule" className="mx-auto max-w-7xl px-4 py-16">
+        <h2 className="font-brand text-3xl md:text-4xl">{t.schedule.title}</h2>
+        <p className="mt-2 text-neutral-300">{t.schedule.intro}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {daysMondayFirst.map(({idx,label})=> (
+            <button key={idx} onClick={()=>setActiveDay(idx)} className={`rounded-full border px-3 py-1.5 text-sm hz-sm ${activeDay===idx? 'border-red-600 bg-red-600/20' : 'border-white/15 hover:bg-white/10'}`}>{label}</button>
+          ))}
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {SCHEDULE.filter(s=>s.dayIndex===activeDay).map((s, i)=> (
+            <div key={i} className="rounded-2xl border border-white/10 bg-neutral-900 p-4 hz-sm transform-gpu">
+              <div className="flex items-baseline justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold">{t.schedule.titles[s.titleKey]}</h3>
+                  <p className="text-sm text-neutral-300">{t.schedule.levels[s.levelKey]} • {s.teacher}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono">{s.time}</p>
+                  <p className="text-xs text-neutral-400">{t.schedule.rooms[s.roomKey]}</p>
+                </div>
               </div>
-            ))}
-          </div>
-        )}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-neutral-400">{t.schedule.note}</p><a href="#contact" className="rounded-2xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.schedule.cta}</a></div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-neutral-400">{t.schedule.note}</p>
       </section>
 
       {/* About */}
-      <section id="about" className="mx-auto max-w-7xl px-4 pb-6 pt-2">
-        <div className="grid items-start gap-10 md:grid-cols-2">
+      <section id="about" className="mx-auto max-w-7xl px-4 py-16">
+        <h2 className="font-brand text-3xl md:text-4xl">{t.about.title}</h2>
+        <div className="mt-4 grid gap-8 md:grid-cols-2">
           <div>
-            <h2 className="font-brand text-3xl md:text-4xl">{t.about.title}</h2>
-            <p className="mt-4 text-neutral-300">{t.about.p1}</p>
-            <p className="mt-2 text-neutral-300">{t.about.p2}</p>
-            <ul className="mt-6 space-y-2 text-neutral-300">{t.about.bullets.map((b,i)=>(<li key={i}>• {b}</li>))}</ul>
+            <p className="text-neutral-300">{t.about.p1}</p>
+            <p className="mt-3 text-neutral-300">{t.about.p2}</p>
+            <ul className="mt-4 list-disc space-y-1 pl-5 text-neutral-300">
+              {t.about.bullets.map((b,i)=>(<li key={i}>{b}</li>))}
+            </ul>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-neutral-900 p-6 shadow-2xl">
-            <h3 className="mb-3 text-lg font-semibold">{t.about.whyTitle}</h3>
+          <div className="rounded-3xl border border-white/10 bg-neutral-900 p-6">
+            <h3 className="mb-2 font-brand text-2xl">{t.about.whyTitle}</h3>
             <p className="text-neutral-300">{t.about.whyText}</p>
-            <div className="mt-6 flex flex-wrap gap-3"><a href="#cta" className="rounded-xl bg-red-600 px-4 py-2 text-sm hover:bg-red-500 hz-sm transform-gpu">{t.about.join}</a><a href="#contact" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.about.ask}</a></div>
+            <div className="mt-4 flex gap-3">
+              <a href="#cta" className="rounded-xl bg-red-600 px-4 py-2 text-sm hover:bg-red-500 hz-sm transform-gpu">{t.about.join}</a>
+              <a href="#contact" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.about.ask}</a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section id="cta" className="relative mx-4 my-16 overflow-hidden rounded-3xl">
+      <section id="cta" className="relative isolate">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-r from-red-900/50 via-neutral-900 to-black"/>
           <picture>
-            <source type="image/webp" srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES}/>
+            <source type="image/webp" srcSet={CTA_BG_SRCSET} sizes={CTA_BG_SIZES} />
             <img
               src={CTA_BG_DEFAULT}
               alt={IMAGES[5].alt[locale]}
-              className="h-full w-full object-cover opacity-25"
+              className="h-full w-full object-cover opacity-40"
               loading="lazy"
+              style={{ filter: 'brightness(1.16) saturate(1.06) contrast(1.04)' }}
               onError={(e)=>{(e.currentTarget as HTMLImageElement).src = FALLBACK_HERO}}
             />
           </picture>
         </div>
-        <div className="mx-auto flex max-w-7xl flex-col items-start gap-4 px-6 py-12 md:flex-row md:items-center md:justify-between md:py-14">
-          <div><h3 className="font-brand text-2xl md:text-3xl">{t.cta.title}</h3><p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p></div>
-          <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium hover:bg-red-500">{t.cta.btn}</a>
+        <div className="mx-auto max-w-7xl px-4 py-16">
+          <div className="rounded-3xl border border-white/10 bg-neutral-900/80 p-8 backdrop-blur">
+            <h2 className="font-brand text-3xl md:text-4xl">{t.cta.title}</h2>
+            <p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p>
+            <a href="#contact" className="mt-5 inline-block rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium hover:bg-red-500 hz-sm transform-gpu">{t.cta.btn}</a>
+          </div>
         </div>
       </section>
 
       {/* Contact */}
-      <section id="contact" className="mx-auto max-w-7xl px-4 pb-24">
+      <section id="contact" className="mx-auto max-w-7xl px-4 py-16">
         <div className="grid gap-8 md:grid-cols-2">
           <div className="rounded-3xl border border-white/10 bg-neutral-900 p-6">
             <h2 className="font-brand text-3xl md:text-4xl">{t.contact.title}</h2>
@@ -466,7 +436,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
               <p><strong>{t.contact.addressLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">{t.contact.address}</a></p>
               <p><strong>{t.contact.phoneLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'tel:'+CONTACT_PHONE_TEL}>{CONTACT_PHONE}</a></p>
               <p><strong>{t.contact.emailLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
-              <p><strong>{t.contact.instagram}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
+              <p><strong>Instagram:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
             </div>
             <div className="mt-6 h-56 md:h-72 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800 shadow">
               <iframe
@@ -483,6 +453,7 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
               <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">Open in Google Maps</a>
             </div>
           </div>
+
           <form onSubmit={handleSubmit} className="rounded-3xl border border-white/10 bg-neutral-900 p-6">
             <h3 className="text-xl font-semibold">{t.contact.form.title}</h3>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -513,20 +484,9 @@ Message: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${
             <img
               src={IMAGES[lightboxIndex].src}
               alt={IMAGES[lightboxIndex].alt[locale]}
-              className={
-                "h-full w-full rounded-2xl shadow-2xl ring-1 ring-white/10 " +
-                (fitMode==='cover' ? 'object-cover' : 'object-contain')
-              }
+              className={"h-full w-full rounded-2xl shadow-2xl ring-1 ring-white/10 "+(fitMode==='cover'?'object-cover':'object-contain')}
               style={{maxHeight:'92vh', maxWidth:'min(96vw,1600px)'}}
-              onLoad={(e)=>{
-                const img=e.currentTarget;
-                const vw=Math.min(window.innerWidth,1600);
-                const vh=window.innerHeight*0.92;
-                const vp=vw/vh;
-                const ar=img.naturalWidth/img.naturalHeight;
-                const mode = (Math.abs(ar - vp)/vp) <= 0.12 ? 'cover' : 'contain';
-                setFitMode(mode);
-              }}
+              onLoad={(e)=>{ const img=e.currentTarget; const vw=Math.min(window.innerWidth,1600); const vh=window.innerHeight*0.92; const vp=vw/vh; const ar=img.naturalWidth/img.naturalHeight; const mode=((Math.abs(ar - vp)/vp) <= 0.12)?'cover':'contain'; setFitMode(mode as 'contain'|'cover'); }}
               onDoubleClick={()=> setFitMode(m=>m==='contain'?'cover':'contain')}
             />
             <p className="mt-3 text-center text-sm text-neutral-300">{IMAGES[lightboxIndex].alt[locale]}</p>
