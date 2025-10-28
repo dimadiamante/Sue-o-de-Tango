@@ -281,6 +281,71 @@ const SCHEDULE: ScheduleItem[] = [
 const WEEK_ORDER = [1,2,3,4,5,6,0];
 
 // -----------------------------
+// Form sending
+// -----------------------------
+
+const FORM_MODE: 'auto' | 'formspree' | 'mailto' = 'formspree';
+
+function getFormspreeId(): string | null {
+  try{
+    const m = document.querySelector('meta[name="formspree-id"]') as HTMLMetaElement | null;
+    if (m && m.content) return m.content.trim();
+    // optional global hook for quick tests
+    const win: any = window as any;
+    if (win && typeof win.FORMSPREE_ID === 'string') return win.FORMSPREE_ID;
+  }catch{}
+  return null;
+}
+
+function sendMailto(obj: Record<string, FormDataEntryValue>, loc: Locale){
+  const subject = encodeURIComponent('New request — Sueño de Tango');
+  const lines: string[] = [];
+  for (const [k,v] of Object.entries(obj)) lines.push(`${k}: ${String(v)}`);
+  lines.push(`locale: ${loc}`);
+  const body = encodeURIComponent(lines.join('
+'));
+  const href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+  window.location.href = href;
+}
+
+async function sendFormData(obj: Record<string, FormDataEntryValue>, loc: Locale): Promise<void>{
+  const id = getFormspreeId();
+  const useFs = (FORM_MODE==='formspree') || (FORM_MODE==='auto' && !!id);
+  if (useFs && id){
+    const fd = new FormData();
+    for (const [k,v] of Object.entries(obj)) fd.append(k, String(v));
+    fd.append('_subject','New request — Sueño de Tango');
+    fd.append('_replyto', String(obj.email || CONTACT_EMAIL));
+    fd.append('_locale', loc);
+
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 12000);
+    try{
+      const res = await fetch(`https://formspree.io/f/${id}?nocache=${Date.now()}`, {
+        method:'POST',
+        body: fd,
+        headers: { 'Accept':'application/json' },
+        signal: ctrl.signal,
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      clearTimeout(t);
+      if (res.ok) return;
+      console.warn('[Form] Formspree non-OK status', res.status);
+      // fallback to mailto if blocked or non-OK
+      sendMailto(obj, loc);
+      return;
+    }catch(err){
+      console.warn('[Form] Formspree fetch failed', err);
+      sendMailto(obj, loc);
+      return;
+    }
+  }
+  // Mailto path
+  sendMailto(obj, loc);
+}
+
+// -----------------------------
 // Component
 // -----------------------------
 
@@ -364,7 +429,7 @@ export default function SuenoDeTangoLanding(){
     const data=new FormData(f);
     const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>;
     try{
-      await sendFormData(obj);
+      await sendFormData(obj, locale);
       alert(I18N[locale].contact.alert);
       f.reset();
     }catch(err){
