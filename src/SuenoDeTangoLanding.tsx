@@ -302,8 +302,7 @@ function sendMailto(obj: Record<string, FormDataEntryValue>, loc: Locale){
   const lines: string[] = [];
   for (const [k,v] of Object.entries(obj)) lines.push(`${k}: ${String(v)}`);
   lines.push(`locale: ${loc}`);
-  const body = encodeURIComponent(lines.join('
-'));
+  const body = encodeURIComponent(lines.join('\n'));
   const href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
   window.location.href = href;
 }
