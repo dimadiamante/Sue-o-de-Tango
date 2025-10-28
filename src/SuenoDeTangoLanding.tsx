@@ -171,65 +171,54 @@ const CONTACT_PHONE = '+40 749 901 534';
 const CONTACT_PHONE_TEL = '+40749901534';
 
 // -----------------------------
-// Form sending: smart auto-mode for GH Pages
+// Hover sounds (WebAudio, no assets)
 // -----------------------------
-
-type FormMode = 'auto' | 'mailto' | 'formspree' | 'webhook';
-// Auto: Formspree if a form ID found (meta or window var), else webhook if URL set, else mailto.
-const FORM_MODE: FormMode = 'auto';
-// Static defaults (can be overridden via <meta name="formspree-id" content="..."> or window.FORMSPREE_ID)
-const FORMSPREE_ID = '' as string; // e.g. "xyzabcd"
-const WEBHOOK_URL = '' as string;   // e.g. "https://script.google.com/macros/s/DEPLOY_ID/exec"
-
-function resolveFormspreeId(): string | null {
+let audioCtx: AudioContext | null = null;
+let unlocked = false;
+let lastHoverAt = 0;
+const MIN_INTERVAL = 0.06; // seconds
+function ensureAudio(){
   try{
-    const meta = document.querySelector('meta[name="formspree-id"]') as HTMLMetaElement | null;
-    if (meta?.content) return meta.content.trim();
-    const w: any = window as any;
-    if (w.FORMSPREE_ID) return String(w.FORMSPREE_ID);
-  }catch{}
-  return FORMSPREE_ID || null;
-}
-
-function getFormMode(): Exclude<FormMode,'auto'> {
-  if (FORM_MODE !== 'auto') return FORM_MODE as Exclude<FormMode,'auto'>;
-  const id = typeof document !== 'undefined' ? resolveFormspreeId() : null;
-  if (id) return 'formspree';
-  if (WEBHOOK_URL) return 'webhook';
-  return 'mailto';
-}
-
-async function sendFormData(obj: Record<string, FormDataEntryValue>) {
-  const mode = getFormMode();
-  if (mode === 'formspree') {
-    const id = resolveFormspreeId();
-    if (!id) { console.warn('[Form] No Formspree ID, fallback to mailto'); }
-    else {
-      const url = `https://formspree.io/f/${id}`;
-      const data = new FormData();
-      Object.entries(obj).forEach(([k,v])=> data.append(k, String(v||'')));
-      data.append('_subject', `${I18N.en.siteTitle} — Contact form`);
-      const res = await fetch(url, { method:'POST', body:data, headers:{ 'Accept':'application/json' } });
-      if (!res.ok) throw new Error(`Formspree error: ${res.status}`);
-      return 'ok';
+    if(!audioCtx){
+      const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (Ctx) audioCtx = new Ctx();
     }
-  }
-  if (mode === 'webhook' && WEBHOOK_URL) {
-    const res = await fetch(WEBHOOK_URL, {
-      method:'POST', headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ ...obj, site: I18N.en.siteTitle, ts: new Date().toISOString() })
-    });
-    if (!res.ok) throw new Error(`Webhook error: ${res.status}`);
-    return 'ok';
-  }
-  // mailto fallback — create hidden anchor and click it to avoid unhandledrejection noise
-  const subject = `${I18N.en.siteTitle} — Contact form`;
-  const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`;
-  const a = document.createElement('a');
-  a.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  a.style.display = 'none';
-  document.body.appendChild(a); a.click(); setTimeout(()=>{ try{document.body.removeChild(a)}catch{} }, 0);
-  return 'mailto';
+    if(audioCtx && !unlocked){
+      const resume = () => { audioCtx!.resume().catch(()=>{}); unlocked = true; };
+      window.addEventListener('pointerdown', resume, { once:true });
+      window.addEventListener('keydown', resume, { once:true });
+    }
+  }catch{}
+}
+function playHover(freq=920){
+  try{
+    ensureAudio();
+    if(!audioCtx || audioCtx.state!=='running') return;
+    const now = audioCtx.currentTime;
+    if (now - lastHoverAt < MIN_INTERVAL) return;
+    lastHoverAt = now;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, now);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + 0.10);
+  }catch{}
+}
+function useHoverSounds(){
+  useEffect(()=>{
+    const onEnter = (e: MouseEvent) => {
+      const el = e.target as EventTarget | null;
+      if (!el || !(el instanceof Element)) return; // ensure real Element (not window/document/text)
+      const target = el.closest('[data-snd="hover"]');
+      if (target) playHover();
+    };
+    document.addEventListener('mouseenter', onEnter, true);
+    return ()=> document.removeEventListener('mouseenter', onEnter, true);
+  },[]);
 }
 
 // -----------------------------
@@ -308,6 +297,7 @@ export default function SuenoDeTangoLanding(){
 
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
+  useHoverSounds();
 
   // Google Fonts + App CSS + Preload hero (guarded)
   useEffect(()=>{
@@ -392,19 +382,19 @@ export default function SuenoDeTangoLanding(){
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-neutral-950/60 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <a href="#hero" className="font-brand text-xl tracking-wide inline-block hz-sm">{t.siteTitle}</a>
+          <a href="#hero" data-snd="hover" className="font-brand text-xl tracking-wide inline-block hz-sm">{t.siteTitle}</a>
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
-            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
-            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
-            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#about">{t.nav.about}</a>
-            <a className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#cta">{t.nav.join}</a>
-            <a className="rounded-full border border-red-600/60 px-4 py-1.5 text-sm hover:bg-red-600/20 hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
+            <a data-snd="hover" className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
+            <a data-snd="hover" className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
+            <a data-snd="hover" className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#about">{t.nav.about}</a>
+            <a data-snd="hover" className="hover:text-red-400/90 inline-flex hz-nav transform-gpu" href="#cta">{t.nav.join}</a>
+            <a data-snd="hover" className="rounded-full border border-red-600/60 px-4 py-1.5 text-sm hover:bg-red-600/20 hz-sm transform-gpu" href="#contact">{t.nav.contact}</a>
           </nav>
           <div className="flex items-center gap-2">
             <select aria-label="Language selector" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
               <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option>
             </select>
-            <button aria-label="Open menu" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{setMenuOpen(s=>!s)}}>
+            <button aria-label="Open menu" data-snd="hover" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{setMenuOpen(s=>!s)}}>
               <span className="sr-only">Menu</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M3 6h18M3 12h18M3 18h18" />
@@ -421,11 +411,11 @@ export default function SuenoDeTangoLanding(){
                   <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option>
                 </select>
               </div>
-              <a className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
-              <a className="py-2 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
-              <a className="py-2 inline-flex hz-nav transform-gpu" href="#about">{t.nav.about}</a>
-              <a className="py-2 inline-flex hz-nav transform-gpu" href="#cta">{t.nav.join}</a>
-              <a className="py-2 inline-flex hz-nav transform-gpu" href="#contact">{t.nav.contact}</a>
+              <a data-snd="hover" className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
+              <a data-snd="hover" className="py-2 inline-flex hz-nav transform-gpu" href="#schedule">{t.nav.schedule}</a>
+              <a data-snd="hover" className="py-2 inline-flex hz-nav transform-gpu" href="#about">{t.nav.about}</a>
+              <a data-snd="hover" className="py-2 inline-flex hz-nav transform-gpu" href="#cta">{t.nav.join}</a>
+              <a data-snd="hover" className="py-2 inline-flex hz-nav transform-gpu" href="#contact">{t.nav.contact}</a>
             </nav>
           </div>
         )}
@@ -455,8 +445,8 @@ export default function SuenoDeTangoLanding(){
           <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left glow-breath">{t.hero.slogan}</p>
           <p className="max-w-xl text-neutral-300 md:text-lg">{t.hero.subtitle}</p>
           <div className="flex flex-wrap gap-3 pt-2">
-            <a href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium tracking-wide hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
-            <a href="#gallery" className="rounded-2xl border border-white/20 px-5 py-3 text-sm hover:bg-white/10">{t.hero.ctaGallery}</a>
+            <a data-snd="hover" href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium tracking-wide hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
+            <a data-snd="hover" href="#gallery" className="rounded-2xl border border-white/20 px-5 py-3 text-sm hover:bg-white/10">{t.hero.ctaGallery}</a>
           </div>
         </div>
       </section>
@@ -468,11 +458,11 @@ export default function SuenoDeTangoLanding(){
             <h2 className="font-brand text-3xl md:text-4xl">{t.gallery.title}</h2>
             <p className="mt-2 max-w-2xl text-neutral-400">{t.gallery.intro}</p>
           </div>
-          <a href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
+          <a data-snd="hover" href="#contact" className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 md:inline-block hz-sm transform-gpu">{t.nav.contact}</a>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {IMAGES.map((img,i)=>(
-            <button key={i} onClick={()=>openLightbox(i)} className="group relative overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-inset ring-white/10 hz-md transform-gpu">
+            <button data-snd="hover" key={i} onClick={()=>openLightbox(i)} className="group relative overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-inset ring-white/10 hz-md transform-gpu">
               <div className="relative h-64 w-full md:h-60 lg:h-72">
                 <img src={img.src} alt={img.alt[locale]} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 group-hover:opacity-95" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -489,7 +479,7 @@ export default function SuenoDeTangoLanding(){
         <p className="mt-2 text-neutral-300">{t.schedule.intro}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {daysMondayFirst.map(({idx,label})=> (
-            <button key={idx} onClick={()=>setActiveDay(idx)} className={`rounded-full border px-3 py-1.5 text-sm hz-sm ${activeDay===idx? 'border-red-600 bg-red-600/20' : 'border-white/15 hover:bg-white/10'}`}>{label}</button>
+            <button data-snd="hover" key={idx} onClick={()=>setActiveDay(idx)} className={`rounded-full border px-3 py-1.5 text-sm hz-sm ${activeDay===idx? 'border-red-600 bg-red-600/20' : 'border-white/15 hover:bg-white/10'}`}>{label}</button>
           ))}
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -526,8 +516,8 @@ export default function SuenoDeTangoLanding(){
             <h3 className="mb-2 font-brand text-2xl">{t.about.whyTitle}</h3>
             <p className="text-neutral-300">{t.about.whyText}</p>
             <div className="mt-4 flex gap-3">
-              <a href="#cta" className="rounded-xl bg-red-600 px-4 py-2 text-sm hover:bg-red-500 hz-sm transform-gpu">{t.about.join}</a>
-              <a href="#contact" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.about.ask}</a>
+              <a data-snd="hover" href="#cta" className="rounded-xl bg-red-600 px-4 py-2 text-sm hover:bg-red-500 hz-sm transform-gpu">{t.about.join}</a>
+              <a data-snd="hover" href="#contact" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10 hz-sm transform-gpu">{t.about.ask}</a>
             </div>
           </div>
         </div>
@@ -540,7 +530,7 @@ export default function SuenoDeTangoLanding(){
           <div className="rounded-3xl border border-white/10 bg-neutral-900/80 p-8 backdrop-blur">
             <h2 className="font-brand text-3xl md:text-4xl">{t.cta.title}</h2>
             <p className="mt-2 max-w-2xl text-neutral-300">{t.cta.text}</p>
-            <a href="#contact" className="mt-5 inline-block rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium hover:bg-red-500 hz-sm transform-gpu">{t.cta.btn}</a>
+            <a data-snd="hover" href="#contact" className="mt-5 inline-block rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium hover:bg-red-500 hz-sm transform-gpu">{t.cta.btn}</a>
           </div>
         </div>
       </section>
@@ -552,10 +542,10 @@ export default function SuenoDeTangoLanding(){
             <h2 className="font-brand text-3xl md:text-4xl">{t.contact.title}</h2>
             <p className="mt-3 text-neutral-300">{t.contact.intro}</p>
             <div className="mt-4 space-y-2 text-neutral-300">
-              <p><strong>{t.contact.addressLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">{t.contact.address}</a></p>
-              <p><strong>{t.contact.phoneLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'tel:'+CONTACT_PHONE_TEL}>{CONTACT_PHONE}</a></p>
-              <p><strong>{t.contact.emailLabel}:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
-              <p><strong>Instagram:</strong> <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
+              <p><strong>{t.contact.addressLabel}:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">{t.contact.address}</a></p>
+              <p><strong>{t.contact.phoneLabel}:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'tel:'+CONTACT_PHONE_TEL}>{CONTACT_PHONE}</a></p>
+              <p><strong>{t.contact.emailLabel}:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
+              <p><strong>Instagram:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
             </div>
             <div className="mt-6 h-56 md:h-72 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800 shadow">
               <iframe
@@ -569,7 +559,7 @@ export default function SuenoDeTangoLanding(){
               />
             </div>
             <div className="mt-2 text-sm">
-              <a className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">Open in Google Maps</a>
+              <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">Open in Google Maps</a>
             </div>
           </div>
 
@@ -582,7 +572,7 @@ export default function SuenoDeTangoLanding(){
               <div><label className="mb-1 block text-sm text-neutral-300" htmlFor="level">{t.contact.form.level}</label><select id="level" name="level" className="w-full rounded-xl border border-white/10 bg-neutral-800 px-3 py-2 outline-none focus:border-red-500">{t.contact.form.levels.map((lvl,i)=>(<option key={i}>{lvl}</option>))}</select></div>
               <div className="md:col-span-2"><label className="mb-1 block text-sm text-neutral-300" htmlFor="message">{t.contact.form.message}</label><textarea id="message" name="message" rows={4} placeholder={t.contact.form.messagePh} className="w-full rounded-xl border border-white/10 bg-neutral-800 px-3 py-2 outline-none focus:border-red-500"/></div>
             </div>
-            <div className="mt-5 flex items-center gap-3"><button type="submit" disabled={submitting} aria-busy={submitting} className="rounded-2xl bg-red-600 px-5 py-2.5 text-sm font-medium hover:bg-red-500 disabled:opacity-60 disabled:cursor-not-allowed">{t.contact.form.submit}</button><span className="text-xs text-neutral-400">{t.contact.form.consent}</span></div>
+            <div className="mt-5 flex items-center gap-3"><button data-snd="hover" type="submit" disabled={submitting} aria-busy={submitting} className="rounded-2xl bg-red-600 px-5 py-2.5 text-sm font-medium hover:bg-red-500 disabled:opacity-60 disabled:cursor-not-allowed">{t.contact.form.submit}</button><span className="text-xs text-neutral-400">{t.contact.form.consent}</span></div>
           </form>
         </div>
       </section>
@@ -590,17 +580,17 @@ export default function SuenoDeTangoLanding(){
       {/* Lightbox */}
       {lightboxIndex!==null && (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
-          <button aria-label={t.lightbox.close} className="absolute right-4 top-4 rounded-xl border border-white/20 p-2 hover:bg-white/10 hz-sm" onClick={closeLightbox}>
+          <button data-snd="hover" aria-label={t.lightbox.close} className="absolute right-4 top-4 rounded-xl border border-white/20 p-2 hover:bg-white/10 hz-sm" onClick={closeLightbox}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <button aria-label={t.lightbox.prev} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10 hz-sm" onClick={prevImage}>
+          <button data-snd="hover" aria-label={t.lightbox.prev} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10 hz-sm" onClick={prevImage}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <button aria-label={t.lightbox.next} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10 hz-sm" onClick={nextImage}>
+          <button data-snd="hover" aria-label={t.lightbox.next} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl border border-white/20 p-3 hover:bg-white/10 hz-sm" onClick={nextImage}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M9 6l6 6-6 6" />
             </svg>
@@ -624,19 +614,19 @@ export default function SuenoDeTangoLanding(){
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 md:flex-row">
           <p className="text-sm text-neutral-400">© {new Date().getFullYear()} {t.siteTitle}</p>
           <div className="flex items-center gap-4 text-neutral-300">
-            <a href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" className="hover:text-red-400 inline-flex hz-sm" aria-label="Instagram" target="_blank" rel="noreferrer noopener">
+            <a data-snd="hover" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" className="hover:text-red-400 inline-flex hz-sm" aria-label="Instagram" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                 <path d="M17.5 6.5h.01" />
               </svg>
             </a>
-            <a href="https://www.facebook.com/dimon.yachmen" className="hover:text-red-400 inline-flex hz-sm" aria-label="Facebook" target="_blank" rel="noreferrer noopener">
+            <a data-snd="hover" href="https://www.facebook.com/dimon.yachmen" className="hover:text-red-400 inline-flex hz-sm" aria-label="Facebook" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
               </svg>
             </a>
-            <a href="https://www.youtube.com/@dimadiamante" className="hover:text-red-400 inline-flex hz-sm" aria-label="YouTube" target="_blank" rel="noreferrer noopener">
+            <a data-snd="hover" href="https://www.youtube.com/@dimadiamante" className="hover:text-red-400 inline-flex hz-sm" aria-label="YouTube" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 3.8 12 3.8 12 3.8s-6.88 0-8.59.62a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 2C5.12 20.2 12 20.2 12 20.2s6.88 0 8.59-.62a2.78 2.78 0 0 0 1.95-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
                 <path d="M9.75 15.02 15.5 12 9.75 8.98v6.04z" />
