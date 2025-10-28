@@ -171,6 +171,68 @@ const CONTACT_PHONE = '+40 749 901 534';
 const CONTACT_PHONE_TEL = '+40749901534';
 
 // -----------------------------
+// Form sending: smart auto-mode for GH Pages
+// -----------------------------
+
+type FormMode = 'auto' | 'mailto' | 'formspree' | 'webhook';
+// Auto: Formspree if a form ID found (meta or window var), else webhook if URL set, else mailto.
+const FORM_MODE: FormMode = 'auto';
+// Static defaults (can be overridden via <meta name="formspree-id" content="..."> or window.FORMSPREE_ID)
+const FORMSPREE_ID = '' as string; // e.g. "xyzabcd"
+const WEBHOOK_URL = '' as string;   // e.g. "https://script.google.com/macros/s/DEPLOY_ID/exec"
+
+function resolveFormspreeId(): string | null {
+  try{
+    const meta = document.querySelector('meta[name="formspree-id"]') as HTMLMetaElement | null;
+    if (meta?.content) return meta.content.trim();
+    const w: any = window as any;
+    if (w.FORMSPREE_ID) return String(w.FORMSPREE_ID);
+  }catch{}
+  return FORMSPREE_ID || null;
+}
+
+function getFormMode(): Exclude<FormMode,'auto'> {
+  if (FORM_MODE !== 'auto') return FORM_MODE as Exclude<FormMode,'auto'>;
+  const id = typeof document !== 'undefined' ? resolveFormspreeId() : null;
+  if (id) return 'formspree';
+  if (WEBHOOK_URL) return 'webhook';
+  return 'mailto';
+}
+
+async function sendFormData(obj: Record<string, FormDataEntryValue>) {
+  const mode = getFormMode();
+  if (mode === 'formspree') {
+    const id = resolveFormspreeId();
+    if (!id) { console.warn('[Form] No Formspree ID, fallback to mailto'); }
+    else {
+      const url = `https://formspree.io/f/${id}`;
+      const data = new FormData();
+      Object.entries(obj).forEach(([k,v])=> data.append(k, String(v||'')));
+      data.append('_subject', `${I18N.en.siteTitle} — Contact form`);
+      const res = await fetch(url, { method:'POST', body:data, headers:{ 'Accept':'application/json' } });
+      if (!res.ok) throw new Error(`Formspree error: ${res.status}`);
+      return 'ok';
+    }
+  }
+  if (mode === 'webhook' && WEBHOOK_URL) {
+    const res = await fetch(WEBHOOK_URL, {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ ...obj, site: I18N.en.siteTitle, ts: new Date().toISOString() })
+    });
+    if (!res.ok) throw new Error(`Webhook error: ${res.status}`);
+    return 'ok';
+  }
+  // mailto fallback — create hidden anchor and click it to avoid unhandledrejection noise
+  const subject = `${I18N.en.siteTitle} — Contact form`;
+  const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`;
+  const a = document.createElement('a');
+  a.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  a.style.display = 'none';
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ try{document.body.removeChild(a)}catch{} }, 0);
+  return 'mailto';
+}
+
+// -----------------------------
 // Gallery
 // -----------------------------
 
@@ -238,6 +300,7 @@ export default function SuenoDeTangoLanding(){
   const [lightboxIndex,setLightboxIndex]=useState<number|null>(null);
   const [fitMode,setFitMode]=useState<'contain'|'cover'>('contain');
   const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru','fr'] as Locale[]).includes(s))?s:'ro'});
+  const [submitting,setSubmitting]=useState(false);
   const t=I18N[locale];
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
@@ -292,9 +355,9 @@ export default function SuenoDeTangoLanding(){
     if(lightboxIndex===null) return;
     const onResize = () => {
       const img = imgRef.current; if(!img) return;
-      const vw = Math.min(window.innerWidth, window.innerHeight * (16/9) * 9/16 * 1000); // harmless cap replacement
+      const vw = Math.min(window.innerWidth, Number.MAX_SAFE_INTEGER);
       const vh = window.innerHeight * 0.92;
-      const vp = (Math.max(320, Math.min(window.innerWidth, window.innerHeight*2))) / vh; // guard
+      const vp = vw / vh;
       const ar = (img.naturalWidth||1)/(img.naturalHeight||1);
       setFitMode(chooseFitMode(ar, vp));
     };
@@ -303,7 +366,24 @@ export default function SuenoDeTangoLanding(){
     return ()=>{ window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize); };
   },[lightboxIndex]);
 
-  const handleSubmit=(e:React.FormEvent)=>{e.preventDefault(); const f=e.target as HTMLFormElement; const data=new FormData(f); const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>; const subject = `${t.siteTitle} — Contact form`; const body = `Name: ${obj.name||''}\nPhone: ${obj.phone||''}\nEmail: ${obj.email||''}\nLevel: ${obj.level||''}\nMessage: ${obj.message||''}`; const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; try{ window.location.href = mailto; }catch(err){ console.warn('[Form] mailto failed', err); } alert(t.contact.alert); f.reset();};
+  const handleSubmit=async (e:React.FormEvent)=>{
+    e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    const f=e.target as HTMLFormElement;
+    const data=new FormData(f);
+    const obj=Object.fromEntries(data.entries()) as Record<string,FormDataEntryValue>;
+    try{
+      await sendFormData(obj);
+      alert(I18N[locale].contact.alert);
+      f.reset();
+    }catch(err){
+      console.warn('[Form] submit failed', err);
+      alert('Sorry, the request could not be sent. Please try again later or write to '+CONTACT_EMAIL);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const daysMondayFirst = [1,2,3,4,5,6,0].map(d=>({ idx:d, label:DAYS[locale][d] }));
 
@@ -502,7 +582,7 @@ export default function SuenoDeTangoLanding(){
               <div><label className="mb-1 block text-sm text-neutral-300" htmlFor="level">{t.contact.form.level}</label><select id="level" name="level" className="w-full rounded-xl border border-white/10 bg-neutral-800 px-3 py-2 outline-none focus:border-red-500">{t.contact.form.levels.map((lvl,i)=>(<option key={i}>{lvl}</option>))}</select></div>
               <div className="md:col-span-2"><label className="mb-1 block text-sm text-neutral-300" htmlFor="message">{t.contact.form.message}</label><textarea id="message" name="message" rows={4} placeholder={t.contact.form.messagePh} className="w-full rounded-xl border border-white/10 bg-neutral-800 px-3 py-2 outline-none focus:border-red-500"/></div>
             </div>
-            <div className="mt-5 flex items-center gap-3"><button type="submit" className="rounded-2xl bg-red-600 px-5 py-2.5 text-sm font-medium hover:bg-red-500">{t.contact.form.submit}</button><span className="text-xs text-neutral-400">{t.contact.form.consent}</span></div>
+            <div className="mt-5 flex items-center gap-3"><button type="submit" disabled={submitting} aria-busy={submitting} className="rounded-2xl bg-red-600 px-5 py-2.5 text-sm font-medium hover:bg-red-500 disabled:opacity-60 disabled:cursor-not-allowed">{t.contact.form.submit}</button><span className="text-xs text-neutral-400">{t.contact.form.consent}</span></div>
           </form>
         </div>
       </section>
