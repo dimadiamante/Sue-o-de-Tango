@@ -545,7 +545,7 @@ export default function SuenoDeTangoLanding(){
               <p><strong>{t.contact.addressLabel}:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={MAPS_URL} target="_blank" rel="noreferrer noopener">{t.contact.address}</a></p>
               <p><strong>{t.contact.phoneLabel}:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'tel:'+CONTACT_PHONE_TEL}>{CONTACT_PHONE}</a></p>
               <p><strong>{t.contact.emailLabel}:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href={'mailto:'+CONTACT_EMAIL}>{CONTACT_EMAIL}</a></p>
-              <p><strong>Instagram:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" target="_blank" rel="noreferrer noopener">@dimon_yachmen</a></p>
+              <p><strong>Instagram:</strong> <a data-snd="hover" className="underline decoration-white/30 underline-offset-4 hover:text-red-400" href="https://instagram.com/sueno_de_tango" target="_blank" rel="noreferrer noopener">@sueno_de_tango</a></p>
             </div>
             <div className="mt-6 h-56 md:h-72 w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-800 shadow">
               <iframe
@@ -614,7 +614,7 @@ export default function SuenoDeTangoLanding(){
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 md:flex-row">
           <p className="text-sm text-neutral-400">© {new Date().getFullYear()} {t.siteTitle}</p>
           <div className="flex items-center gap-4 text-neutral-300">
-            <a data-snd="hover" href="https://www.instagram.com/dimon_yachmen?igsh=MWxtN2kxcnVsdmI3bg==" className="hover:text-red-400 inline-flex hz-sm" aria-label="Instagram" target="_blank" rel="noreferrer noopener">
+            <a data-snd="hover" href="https://instagram.com/sueno_de_tango" className="hover:text-red-400 inline-flex hz-sm" aria-label="Instagram" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
