@@ -166,7 +166,7 @@ const CTA_BG_SIZES = '100vw';
 const MAPS_URL = 'https://maps.app.goo.gl/Xe1dM73d6raCRfNU7';
 
 // Contact
-const CONTACT_EMAIL = '7437976@gmail.com';
+const CONTACT_EMAIL = 'info@sueno-de-tango.org';
 const CONTACT_PHONE = '+40 749 901 534';
 const CONTACT_PHONE_TEL = '+40749901534';
 
