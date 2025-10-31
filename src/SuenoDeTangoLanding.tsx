@@ -468,7 +468,7 @@ export default function SuenoDeTangoLanding(){
         </div>
         {menuOpen && (
           <div className="border-t border-white/10 md:hidden">
-            <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3" onClick={()=>setMenuOpen(false)}>
+            <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3" onClick={(e)=>{ const el = e.target as HTMLElement; if (el && el.closest('a')) setMenuOpen(false); }}>
               <div className="mb-2">
                 <label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
                 <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm">
