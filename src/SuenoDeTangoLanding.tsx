@@ -358,6 +358,50 @@ export default function SuenoDeTangoLanding(){
   const todayIndex=new Date().getDay();
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
   const imgRef = useRef<HTMLImageElement|null>(null);
+  // Swipe navigation (mobile/lightbox)
+  const SWIPE_THRESH = 60; // px to trigger slide
+  const VERT_LOCK = 24; // px vertical movement cancels swipe intent
+  const startX = useRef<number|null>(null);
+  const startY = useRef<number|null>(null);
+  const dragging = useRef(false);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+    dragging.current = true;
+    setDragOffset(0);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!dragging.current || startX.current == null || startY.current == null) return;
+    const dx = e.touches[0].clientX - startX.current;
+    const dy = e.touches[0].clientY - startY.current;
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > VERT_LOCK) { dragging.current = false; setDragOffset(0); return; }
+    e.preventDefault();
+    setDragOffset(dx);
+  };
+  const onTouchEnd = () => {
+    if (!dragging.current) return;
+    dragging.current = false;
+    const dx = dragOffset;
+    setDragOffset(0);
+    if (Math.abs(dx) > SWIPE_THRESH) { if (dx < 0) nextImage(); else prevImage(); }
+  };
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.buttons !== 1) return;
+    startX.current = e.clientX; startY.current = e.clientY; dragging.current = true; setDragOffset(0);
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragging.current || startX.current == null || startY.current == null) return;
+    const dx = e.clientX - startX.current; const dy = e.clientY - startY.current;
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > VERT_LOCK) { dragging.current = false; setDragOffset(0); (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); return; }
+    e.preventDefault(); setDragOffset(dx);
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (!dragging.current) return; (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); onTouchEnd();
+  };
 
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
@@ -659,12 +703,13 @@ export default function SuenoDeTangoLanding(){
               <path d="M9 6l6 6-6 6" />
             </svg>
           </button>
-          <div className="lb-frame relative w-[96vw] h-[92dvh] max-h-[92vh] flex items-center justify-center">
+          <div className=\"lb-frame relative w-[96vw] h-[92dvh] max-h-[92vh] flex items-center justify-center\" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
             <img
               ref={imgRef}
               src={IMAGES[lightboxIndex].src}
               alt={IMAGES[lightboxIndex].alt[locale]}
               className={"lb-img rounded-2xl shadow-2xl ring-1 ring-white/10 transition-transform "+(fitMode==='cover'?'w-full h-full object-cover':'max-w-full max-h-[92dvh] w-auto h-auto object-contain')}
+              style={{ transform: dragOffset ? ('translateX('+dragOffset+'px)') : undefined }}
               onLoad={(e)=>{ const img=e.currentTarget; const vw=Math.min(window.innerWidth, Number.MAX_SAFE_INTEGER); const vh=window.innerHeight*0.92; const vp=vw/vh; const ar=(img.naturalWidth||1)/(img.naturalHeight||1); setFitMode(chooseFitMode(ar,vp)); }}
               onDoubleClick={()=> setFitMode(m=>m==='contain'?'cover':'contain')}
             />
