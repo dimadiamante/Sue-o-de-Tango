@@ -261,6 +261,8 @@ function runSanityChecks(){
 
   end=group('Hero assets are .webp'); const heroOk=HERO_BANNER.endsWith('.webp')&&FALLBACK_HERO.endsWith('.webp'); !heroOk?console.error('[SANITY] Hero not webp'):
   console.log('[SANITY] OK'); end();
+
+  end=group('I18N core fields present'); const fieldsOk=(['en','ro','ru','fr'] as Locale[]).every(Lc=>!!I18N[Lc]?.hero?.title && !!I18N[Lc]?.hero?.slogan); !fieldsOk?console.error('[SANITY] Missing core i18n fields'):console.log('[SANITY] OK'); end();
 }
 
 // -----------------------------
@@ -703,7 +705,7 @@ export default function SuenoDeTangoLanding(){
               <path d="M9 6l6 6-6 6" />
             </svg>
           </button>
-          <div className=\"lb-frame relative w-[96vw] h-[92dvh] max-h-[92vh] flex items-center justify-center\" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
+          <div className="lb-frame relative w-[96vw] h-[92dvh] max-h-[92vh] flex items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
             <img
               ref={imgRef}
               src={IMAGES[lightboxIndex].src}
