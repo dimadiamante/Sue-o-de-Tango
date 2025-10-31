@@ -361,12 +361,16 @@ export default function SuenoDeTangoLanding(){
   const [activeDay,setActiveDay]=useState<number>(todayIndex);
   const imgRef = useRef<HTMLImageElement|null>(null);
   // Swipe navigation (mobile/lightbox)
-  const SWIPE_THRESH = 60; // px to trigger slide
-  const VERT_LOCK = 24; // px vertical movement cancels swipe intent
+  const SWIPE_THRESH = 60; // px to trigger slide left/right
+  const SWIPE_CLOSE = 90;  // px to close by vertical swipe
+  const VERT_LOCK = 24; // px vertical movement cancels horizontal intent
   const startX = useRef<number|null>(null);
   const startY = useRef<number|null>(null);
   const dragging = useRef(false);
-  const [dragOffset, setDragOffset] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);     // X translate for slide feedback
+  const [dragOffsetY, setDragOffsetY] = useState(0);   // Y translate for close feedback
+  const offsetXRef = useRef(0);
+  const offsetYRef = useRef(0);
 
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length !== 1) return;
@@ -374,32 +378,59 @@ export default function SuenoDeTangoLanding(){
     startY.current = e.touches[0].clientY;
     dragging.current = true;
     setDragOffset(0);
+    setDragOffsetY(0);
+    offsetXRef.current = 0;
+    offsetYRef.current = 0;
   };
   const onTouchMove = (e: React.TouchEvent) => {
     if (!dragging.current || startX.current == null || startY.current == null) return;
     const dx = e.touches[0].clientX - startX.current;
     const dy = e.touches[0].clientY - startY.current;
-    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > VERT_LOCK) { dragging.current = false; setDragOffset(0); return; }
+    offsetXRef.current = dx; offsetYRef.current = dy;
+    const absX = Math.abs(dx), absY = Math.abs(dy);
+    // Prevent page scroll while interacting with lightbox
     e.preventDefault();
-    setDragOffset(dx);
+    if (absY > absX && absY > VERT_LOCK) { // vertical gesture dominates
+      setDragOffset(0);
+      setDragOffsetY(dy);
+    } else { // horizontal gesture
+      setDragOffset(dx);
+      setDragOffsetY(0);
+    }
   };
   const onTouchEnd = () => {
     if (!dragging.current) return;
     dragging.current = false;
-    const dx = dragOffset;
+    const dx = offsetXRef.current;
+    const dy = offsetYRef.current;
     setDragOffset(0);
-    if (Math.abs(dx) > SWIPE_THRESH) { if (dx < 0) nextImage(); else prevImage(); }
+    setDragOffsetY(0);
+    if (Math.abs(dx) > SWIPE_THRESH && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) nextImage(); else prevImage();
+      return;
+    }
+    if (Math.abs(dy) > SWIPE_CLOSE && Math.abs(dy) > Math.abs(dx)) {
+      closeLightbox();
+      return;
+    }
   };
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === 'mouse' && e.buttons !== 1) return;
-    startX.current = e.clientX; startY.current = e.clientY; dragging.current = true; setDragOffset(0);
+    startX.current = e.clientX; startY.current = e.clientY; dragging.current = true; setDragOffset(0); setDragOffsetY(0);
+    offsetXRef.current = 0; offsetYRef.current = 0;
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragging.current || startX.current == null || startY.current == null) return;
     const dx = e.clientX - startX.current; const dy = e.clientY - startY.current;
-    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > VERT_LOCK) { dragging.current = false; setDragOffset(0); (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); return; }
-    e.preventDefault(); setDragOffset(dx);
+    offsetXRef.current = dx; offsetYRef.current = dy;
+    const absX = Math.abs(dx), absY = Math.abs(dy);
+    if (absY > absX && absY > VERT_LOCK) { // treat as vertical drag feedback
+      setDragOffset(0); setDragOffsetY(dy);
+    } else {
+      setDragOffset(dx); setDragOffsetY(0);
+    }
+    e.preventDefault();
   };
   const onPointerUp = (e: React.PointerEvent) => {
     if (!dragging.current) return; (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); onTouchEnd();
@@ -711,7 +742,7 @@ export default function SuenoDeTangoLanding(){
               src={IMAGES[lightboxIndex].src}
               alt={IMAGES[lightboxIndex].alt[locale]}
               className={"lb-img rounded-2xl shadow-2xl ring-1 ring-white/10 transition-transform "+(fitMode==='cover'?'w-full h-full object-cover':'max-w-full max-h-[92dvh] w-auto h-auto object-contain')}
-              style={{ transform: dragOffset ? ('translateX('+dragOffset+'px)') : undefined }}
+              style={{ transform: dragOffset || dragOffsetY ? (`translate3d(${dragOffset}px, ${dragOffsetY}px, 0)`) : undefined }}
               onLoad={(e)=>{ const img=e.currentTarget; const vw=Math.min(window.innerWidth, Number.MAX_SAFE_INTEGER); const vh=window.innerHeight*0.92; const vp=vw/vh; const ar=(img.naturalWidth||1)/(img.naturalHeight||1); setFitMode(chooseFitMode(ar,vp)); }}
               onDoubleClick={()=> setFitMode(m=>m==='contain'?'cover':'contain')}
             />
@@ -729,7 +760,7 @@ export default function SuenoDeTangoLanding(){
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <path d="M17.5 6.5h.01" />
+                <path d="M17.5 6.5h+.01" />
               </svg>
             </a>
             <a data-snd="hover" href="https://www.facebook.com/dimon.yachmen" className="hover:text-red-400 inline-flex hz-sm" aria-label="Facebook" target="_blank" rel="noreferrer noopener">
