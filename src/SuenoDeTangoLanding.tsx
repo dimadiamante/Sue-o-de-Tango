@@ -60,7 +60,7 @@ const I18N = {
     nav:{gallery:'Galerie',schedule:'Orar',about:'Despre',join:'Alătură-te',contact:'Înscriere'},
     hero:{
       title:'Sueño de Tango', slogan:'El arte del encuentro',
-      subtitle:'Sueño de Tango este un spațiu în care tangoul devine o manieră de a simți, nu doar de a te mișca. Aici contează contactul, respirația și liniștea dintre pași; tehnica este doar un mijloc de a exprima interiorul. Nu este doar o școală — este o atmosferă a întâlnirii, a visului și a profunzimii.',
+      subtitle:'Sueño de Tango este un spațiu în care tangoul devine o manieră de a simți, nu doar de a te mișca. Aici contează contactul, respirația și liniștea dintre pași; tehnica este doar un mijloc de a-ți exprima simțirile. Nu este doar o școală — este o atmosferă a întâlnirii, a visului și a profunzimii.',
       ctaTrial:'Programează o lecție de probă', ctaGallery:'Vezi galeria'
     },
     gallery:{title:'Galerie',intro:'Lumină de contrast, pauze vii și respirația dansului. Click pe fotografie pentru ecran complet.'},
@@ -763,7 +763,7 @@ export default function SuenoDeTangoLanding(){
                 <path d="M17.5 6.5h+.01" />
               </svg>
             </a>
-            <a data-snd="hover" href="https://www.facebook.com/dimon.yachmen" className="hover:text-red-400 inline-flex hz-sm" aria-label="Facebook" target="_blank" rel="noreferrer noopener">
+            <a data-snd="hover" href="https://www.facebook.com/suenodetango/" className="hover:text-red-400 inline-flex hz-sm" aria-label="Facebook" target="_blank" rel="noreferrer noopener">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
               </svg>
