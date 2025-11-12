@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 
 // Sueño de Tango — Variant 6 (compact, optimized)
-// RO default, EN/RU/FR supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
+// RO default, EN/RU supported, 24‑hour time, Monday‑first week, lightbox, i18n, CTA, contact form.
 // Fonts: Cormorant Garamond (brand) + Lato (text)
 // Animations & hover effects live in styles/app.css. Only Hero uses an image background; site-wide bg removed.
 
@@ -113,33 +113,6 @@ const I18N = {
       alert:'Спасибо! Мы свяжемся с вами в ближайшее время.'
     },
     lightbox:{close:'Закрыть',prev:'Назад',next:'Вперёд'}
-  },
-    hero:{
-      title:'Sueño de Tango', slogan:'El arte del encuentro',
-      subtitle:"Sueño de Tango est un espace où le tango devient une manière de ressentir, pas seulement de bouger. Ici, le contact, la respiration et le silence entre les pas comptent ; la technique n’est qu’un moyen d’exprimer ce qui est à l’intérieur. Ce n’est pas seulement une école — c’est une atmosphère de rencontre, de rêve et de profondeur.",
-      ctaTrial:'Réserver une leçon d’essai', ctaGallery:'Voir la galerie'
-    },
-    gallery:{title:'Galerie',intro:'Lumière en contraste, pauses vivantes et souffle de la danse. Cliquez sur une photo pour l’ouvrir en plein écran.'},
-    schedule:{
-      title:'Horaires', intro:'Choisissez un jour de la semaine pour voir les cours et les événements.', note:'* L’horaire peut changer. Merci de confirmer avant la visite.', cta:'Demander / S’inscrire',
-      titles:{
-        basicCourse:'Cours de base', musicalityImprovisation:'Musicalité & Improvisation', techniqueAxisPivots:'Technique : axe & pivots', partnerWorkAbrazo:'Travail en couple : abrazo', tangoVals:'Tango‑Vals', practicaMilonga:'Pratique / Milonga', intensiveVals:'Intensif : Vals', bootcampFromScratch:'Bootcamp depuis zéro'
-      },
-      levels:{beginners:'Débutants',improvers:'Intermédiaires',allLevels:'Tous niveaux',mixedBegImp:'Débutants/Intermédiaires',intermediatePlus:'Intermédiaire+',open:'Ouvert'},
-      rooms:{roomA:'Salle A',roomB:'Salle B',mainHall:'Grande salle'}
-    },
-    about:{
-      title:'À propos de l’école', p1:'Nous enseignons le tango argentin authentique : des premiers pas aux nuances profondes de l’improvisation.', p2:'Nous accordons une attention particulière à la musicalité, à l’axe, à la qualité de l’abrazo et à la culture de la piste.',
-      bullets:['Groupes pour tous niveaux','Pratiques régulières et milongas','Cours particuliers et stages intensifs'],
-      whyTitle:'Pourquoi « Sueño de Tango »', whyText:'Notre philosophie visuelle — le contraste entre la lumière et l’ombre, où chaque pause et pivot se lit comme un plan de cinéma. Nous construisons la danse comme un dialogue et vous invitons dans cette histoire.', join:'Rejoindre', ask:'Poser une question'
-    },
-    cta:{title:'Prêt pour le premier pas ?',text:'Réservez une leçon d’essai — nous trouverons un niveau et un partenariat confortables.',btn:'S’inscrire'},
-    contact:{
-      title:'Contact',intro:'Nous sommes au centre-ville. Écrivez‑nous ou laissez une demande.', addressLabel:'Adresse',address:'Strada Vlaicu Vodă 7, București', phoneLabel:'Téléphone', instagram:'Instagram', emailLabel:'E‑mail',
-      form:{title:'Envoyer une demande',name:'Nom',phone:'Téléphone',email:'E‑mail',level:'Niveau',levels:['Débutants','Intermédiaires','Intermédiaire / Avancé','Cours particuliers'],message:'Message',messagePh:'Posez une question ou indiquez l’horaire qui vous convient',submit:'Envoyer',consent:'En envoyant, vous acceptez le traitement des données.'},
-      alert:'Merci ! Nous vous contacterons bientôt.'
-    },
-    lightbox:{close:'Fermer',prev:'Précédent',next:'Suivant'}
   }
 } as const;
 
