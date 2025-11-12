@@ -9,7 +9,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 // Types & locales
 // -----------------------------
 
-type Locale = 'en' | 'ro' | 'ru' | 'fr';
+type Locale = 'en' | 'ro' | 'ru';
 
 type TitleKey = 'basicCourse'|'musicalityImprovisation'|'techniqueAxisPivots'|'partnerWorkAbrazo'|'tangoVals'|'practicaMilonga'|'intensiveVals'|'bootcampFromScratch';
 
@@ -20,8 +20,7 @@ type RoomKey = 'roomA'|'roomB'|'mainHall';
 const DAYS: Record<Locale,string[]> = {
   en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
   ro:['Du','Lu','Ma','Mi','Jo','Vi','Sâ'],
-  ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
-  fr:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']
+  ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']
 };
 
 const I18N = {
@@ -115,9 +114,6 @@ const I18N = {
     },
     lightbox:{close:'Закрыть',prev:'Назад',next:'Вперёд'}
   },
-  fr:{
-    siteTitle:'Sueño de Tango',
-    nav:{gallery:'Galerie',schedule:'Horaires',about:'À propos',join:'Rejoindre',contact:'S’inscrire'},
     hero:{
       title:'Sueño de Tango', slogan:'El arte del encuentro',
       subtitle:"Sueño de Tango est un espace où le tango devient une manière de ressentir, pas seulement de bouger. Ici, le contact, la respiration et le silence entre les pas comptent ; la technique n’est qu’un moyen d’exprimer ce qui est à l’intérieur. Ce n’est pas seulement une école — c’est une atmosphère de rencontre, de rêve et de profondeur.",
@@ -230,10 +226,9 @@ const IMG_SRC = GALLERY_FILES.map(f => BASE_URL + 'images/' + f);
 const ALT = {
   en:['Silhouette couple in dramatic light','Close-up tango steps','Abrazo in backlight','Pivot with torso twist','Couple on an empty stage','Dancers\' shoes details'],
   ro:['Siluetă de cuplu în lumină dramatică','Prim-plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte'],
-  ru:['Силуэт пары в драматичном свете','Крупный план шагов танго','Абразо на контровом свете','Пивот с разворотом корпуса','Пара на пустой сцене','Детали танцевальной обуви'],
-  fr:['Silhouette d\'un couple en lumière dramatique','Gros plan des pas de tango','Abrazo à contre-jour','Pivot avec torsion du buste','Couple sur une scène vide','Détails des chaussures des danseurs']
+  ru:['Силуэт пары в драматичном свете','Крупный план шагов танго','Абразо на контровом свете','Пивот с разворотом корпуса','Пара на пустой сцене','Детали танцевальной обуви']
 };
-const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i],fr:ALT.fr[i]}}));
+const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i]}}));
 
 // -----------------------------
 // Helpers & sanity tests
@@ -262,7 +257,7 @@ function runSanityChecks(){
   end=group('Hero assets are .webp'); const heroOk=HERO_BANNER.endsWith('.webp')&&FALLBACK_HERO.endsWith('.webp'); !heroOk?console.error('[SANITY] Hero not webp'):
   console.log('[SANITY] OK'); end();
 
-  end=group('I18N core fields present'); const fieldsOk=(['en','ro','ru','fr'] as Locale[]).every(Lc=>!!I18N[Lc]?.hero?.title && !!I18N[Lc]?.hero?.slogan); !fieldsOk?console.error('[SANITY] Missing core i18n fields'):console.log('[SANITY] OK'); end();
+  end=group('I18N core fields present'); const fieldsOk=(['en','ro','ru'] as Locale[]).every(Lc=>!!I18N[Lc]?.hero?.title && !!I18N[Lc]?.hero?.slogan); !fieldsOk?console.error('[SANITY] Missing core i18n fields'):console.log('[SANITY] OK'); end();
 }
 
 // -----------------------------
@@ -354,7 +349,7 @@ export default function SuenoDeTangoLanding(){
   const [menuOpen,setMenuOpen]=useState(false);
   const [lightboxIndex,setLightboxIndex]=useState<number|null>(null);
   const [fitMode,setFitMode]=useState<'contain'|'cover'>('contain');
-  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru','fr'] as Locale[]).includes(s))?s:'ro'});
+  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru'] as Locale[]).includes(s))?s:'ro'});
   const [submitting,setSubmitting]=useState(false);
   const t=I18N[locale];
   const todayIndex=new Date().getDay();
@@ -533,7 +528,7 @@ export default function SuenoDeTangoLanding(){
           </nav>
           <div className="flex items-center gap-2">
             <select aria-label="Language selector" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="hidden md:block rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-sm">
-              <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option>
+              <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option>
             </select>
             <button aria-label="Open menu" data-snd="hover" className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 hz-sm" onClick={()=>{setMenuOpen(s=>!s)}}>
               <span className="sr-only">Menu</span>
@@ -549,7 +544,7 @@ export default function SuenoDeTangoLanding(){
               <div className="mb-2">
                 <label className="mr-2 text-sm text-neutral-400" htmlFor="locale-sm">Lang</label>
                 <select id="locale-sm" value={locale} onChange={(e)=>{const v=e.target.value as Locale; setLocale(v);}} className="rounded-lg border border-white/15 bg-neutral-900 px-2 py-1 text-sm">
-                  <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option><option value="fr">FR</option>
+                  <option value="en">EN</option><option value="ro">RO</option><option value="ru">RU</option>
                 </select>
               </div>
               <a data-snd="hover" className="py-2 inline-flex hz-nav transform-gpu" href="#gallery">{t.nav.gallery}</a>
