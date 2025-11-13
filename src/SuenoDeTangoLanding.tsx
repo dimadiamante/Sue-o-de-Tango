@@ -418,7 +418,7 @@ export default function SuenoDeTangoLanding(){
     if (!document.querySelector('link[data-app-css]')) {
       const l = document.createElement('link');
       l.rel='stylesheet';
-      l.href=BASE_URL+'styles/app.css';
+      l.href=BASE_URL+'styles/app.css?v=hero-glow-2';
       l.setAttribute('data-app-css','');
       document.head.appendChild(l);
     }
@@ -551,7 +551,7 @@ export default function SuenoDeTangoLanding(){
             <span className="hero-line hero-line1">Sueño</span>
             <span className="hero-line hero-line2">de Tango</span>
           </h1>
-          <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left text-white">{t.hero.slogan}</p>
+          <p className="hero-slogan font-brand font-bold tracking-wide text-2xl md:text-3xl lg:text-4xl text-left text-white" style={{ textShadow: 'none', WebkitTextStroke: '0', color: '#fff', fontWeight: 700 }}>{t.hero.slogan}</p>
           <p className="max-w-xl text-neutral-300 md:text-lg">{t.hero.subtitle}</p>
           <div className="flex flex-wrap gap-3 pt-2">
             <a data-snd="hover" href="#contact" className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-medium tracking-wide hover:bg-red-500 hz-sm transform-gpu">{t.hero.ctaTrial}</a>
