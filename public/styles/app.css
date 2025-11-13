@@ -34,4 +34,3 @@ html{scroll-behavior:smooth}
 .hz-md:hover{transform:translateZ(0) scale(1.06)}
 .hz-nav{transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
 .hz-nav:hover{transform:translateZ(0) scale(1.08)}
-
