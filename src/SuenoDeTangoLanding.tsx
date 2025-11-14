@@ -178,67 +178,16 @@ function playHover(freq=920){
   }catch{}
 }
 function useHoverSounds(){
-  // Inject Google Fonts + app CSS + preload hero (guarded)
-  useEffect(()=>{
-    if (!document.querySelector('link[data-gf]')) {
-      const pre1 = document.createElement('link'); pre1.rel='preconnect'; pre1.href='https://fonts.googleapis.com'; pre1.setAttribute('data-gf',''); document.head.appendChild(pre1);
-      const pre2 = document.createElement('link'); pre2.rel='preconnect'; pre2.href='https://fonts.gstatic.com'; pre2.crossOrigin='anonymous'; pre2.setAttribute('data-gf',''); document.head.appendChild(pre2);
-      const css = document.createElement('link'); css.rel='stylesheet'; css.href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,100..900;1,100..900&display=swap'; css.setAttribute('data-gf',''); document.head.appendChild(css);
-    }
-    if (!document.querySelector('link[data-app-css]')) {
-      const l = document.createElement('link');
-      l.rel='stylesheet';
-      l.href=BASE_URL+'styles/app.css?v=hero-override-3';
-      l.setAttribute('data-app-css','');
-      document.head.appendChild(l);
-    }
-    if (!document.querySelector('link[data-preload-hero]')) {
-      const l=document.createElement('link'); l.rel='preload'; l.as='image'; l.href=HERO_BANNER; l.setAttribute('data-preload-hero',''); document.head.appendChild(l);
-    }
-  },[]);
-
-  // Override styles: slogan no glow; title breathing glow
-  useEffect(()=>{
-    if (document.getElementById('hero-override-style')) return;
-    const s = document.createElement('style');
-    s.id = 'hero-override-style';
-    s.textContent = `
-.hero-slogan{animation:none !important;text-shadow:none !important;-webkit-text-stroke:0 !important;color:#fff !important;font-weight:700 !important;}
-.hero-title{--g1:rgba(255,255,255,.25);--g2:rgba(255,255,255,.6);--g3:rgba(255,255,255,.85);text-shadow:0 0 .25rem var(--g1),0 0 .9rem var(--g2),0 0 1.8rem var(--g1);} 
-.hero-title.glow-breath{animation:glow-breath 3.4s ease-in-out infinite;}
-@keyframes glow-breath{0%,100%{text-shadow:0 0 .2rem var(--g1),0 0 1.0rem var(--g2),0 0 2.0rem var(--g2);}50%{text-shadow:0 0 .35rem var(--g2),0 0 1.5rem var(--g3),0 0 2.6rem rgba(255,255,255,.95);}}
-`;
-    document.head.appendChild(s);
-    return ()=>{ try{ s.remove(); }catch{} };
-  },[]);
-
-  // Favicons (local files)
-  useEffect(()=>{
-    if (document.querySelector('link[data-local-favicon]')) return;
-    const add = (rel:string, href:string, attrs?:Record<string,string>)=>{
-      const l = document.createElement('link'); l.rel = rel; l.href = href; if(attrs){ for(const [k,v] of Object.entries(attrs)) l.setAttribute(k,v); } l.setAttribute('data-local-favicon',''); document.head.appendChild(l);
-    };
-    const base = BASE_URL + 'images/';
-    add('icon', base + 'favicon.svg', { type:'image/svg+xml' });
-    add('icon', base + 'favicon-32.png', { type:'image/png', sizes:'32x32' });
-    add('icon', base + 'favicon-192.png', { type:'image/png', sizes:'192x192' });
-    add('apple-touch-icon', base + 'apple-touch-icon.png', { sizes:'180x180' });
-  },[]);
-
-  // Hover sound listener
   useEffect(()=>{
     const onEnter = (e: MouseEvent) => {
       const el = e.target as EventTarget | null;
-      if (!el || !(el instanceof Element)) return;
+      if (!el || !(el instanceof Element)) return; // ensure real Element (not window/document/text)
       const target = el.closest('[data-snd="hover"]');
       if (target) playHover();
     };
     document.addEventListener('mouseenter', onEnter, true);
     return ()=> document.removeEventListener('mouseenter', onEnter, true);
   },[]);
-
-  // Sanity logs
-  useEffect(()=>{ try{ console.log('[SANITY] running'); runSanityChecks(); }catch{} },[]);
 }
 
 // -----------------------------
@@ -330,8 +279,7 @@ function sendMailto(obj: Record<string, FormDataEntryValue>, loc: Locale){
   const lines: string[] = [];
   for (const [k,v] of Object.entries(obj)) lines.push(`${k}: ${String(v)}`);
   lines.push(`locale: ${loc}`);
-  const body = encodeURIComponent(lines.join('
-'));
+  const body = encodeURIComponent(lines.join('\n'));
   const href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
   window.location.href = href;
 }
@@ -349,7 +297,7 @@ async function sendFormData(obj: Record<string, FormDataEntryValue>, loc: Locale
     const ctrl = new AbortController();
     const t = setTimeout(()=>ctrl.abort(), 12000);
     try{
-      const res = await fetch(`https://formspree.io/f/${id}?nocache=${Date.now()}`, {
+      const res = await fetch(`https://formspree.io/f/${id}?nocache=${Date.now()}` , {
         method:'POST',
         body: fd,
         headers: { 'Accept':'application/json' },
@@ -467,6 +415,55 @@ export default function SuenoDeTangoLanding(){
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
   useHoverSounds();
 
+  // Load Google Fonts + app CSS + preload hero once
+  useEffect(()=>{
+    if (!document.querySelector('link[data-gf]')) {
+      const pre1 = document.createElement('link'); pre1.rel='preconnect'; pre1.href='https://fonts.googleapis.com'; pre1.setAttribute('data-gf',''); document.head.appendChild(pre1);
+      const pre2 = document.createElement('link'); pre2.rel='preconnect'; pre2.href='https://fonts.gstatic.com'; pre2.crossOrigin='anonymous'; pre2.setAttribute('data-gf',''); document.head.appendChild(pre2);
+      const css = document.createElement('link'); css.rel='stylesheet'; css.href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,100..900;1,100..900&display=swap'; css.setAttribute('data-gf',''); document.head.appendChild(css);
+    }
+    if (!document.querySelector('link[data-app-css]')) {
+      const l = document.createElement('link');
+      l.rel='stylesheet';
+      l.href=BASE_URL+'styles/app.css';
+      l.setAttribute('data-app-css','');
+      document.head.appendChild(l);
+    }
+    if (!document.querySelector('link[data-preload-hero]')) {
+      const l=document.createElement('link'); l.rel='preload'; l.as='image'; l.href=HERO_BANNER; l.setAttribute('data-preload-hero',''); document.head.appendChild(l);
+    }
+  },[]);
+
+  // Override styles: slogan no glow; title breathing glow
+  useEffect(()=>{
+    if (document.getElementById('hero-override-style')) return;
+    const s = document.createElement('style');
+    s.id = 'hero-override-style';
+    s.textContent = `
+.hero-slogan{animation:none !important;text-shadow:none !important;-webkit-text-stroke:0 !important;color:#fff !important;font-weight:700 !important;}
+.hero-title{--g1:rgba(255,255,255,.25);--g2:rgba(255,255,255,.6);--g3:rgba(255,255,255,.85);text-shadow:0 0 .25rem var(--g1),0 0 .9rem var(--g2),0 0 1.8rem var(--g1);} 
+.hero-title.glow-breath{animation:glow-breath 3.4s ease-in-out infinite;}
+@keyframes glow-breath{0%,100%{text-shadow:0 0 .2rem var(--g1),0 0 1.0rem var(--g2),0 0 2.0rem var(--g2);}50%{text-shadow:0 0 .35rem var(--g2),0 0 1.5rem var(--g3),0 0 2.6rem rgba(255,255,255,.95);}}
+`;
+    document.head.appendChild(s);
+    return ()=>{ try{ s.remove(); }catch{} };
+  },[]);
+
+  // Favicons (local files)
+  useEffect(()=>{
+    if (document.querySelector('link[data-local-favicon]')) return;
+    const add = (rel:string, href:string, attrs?:Record<string,string>)=>{
+      const l = document.createElement('link'); l.rel = rel; l.href = href; if(attrs){ for(const [k,v] of Object.entries(attrs)) l.setAttribute(k,v); } l.setAttribute('data-local-favicon',''); document.head.appendChild(l);
+    };
+    const base = BASE_URL + 'images/';
+    add('icon', base + 'favicon.svg', { type:'image/svg+xml' });
+    add('icon', base + 'favicon-32.png', { type:'image/png', sizes:'32x32' });
+    add('icon', base + 'favicon-192.png', { type:'image/png', sizes:'192x192' });
+    add('apple-touch-icon', base + 'apple-touch-icon.png', { sizes:'180x180' });
+  },[]);
+
+  useEffect(()=>{ try{ console.log('[SANITY] running'); runSanityChecks(); }catch{} },[]);
+
   const openLightbox=useCallback((i:number)=>{setLightboxIndex(i)},[]);
   const closeLightbox=useCallback(()=>{setLightboxIndex(null)},[]);
   const prevImage=useCallback(()=>{if(lightboxIndex===null)return; setLightboxIndex(i=>wrapIndex(IMAGES.length,i!,-1))},[lightboxIndex]);
@@ -572,7 +569,7 @@ export default function SuenoDeTangoLanding(){
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-neutral-950" />
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 px-4 py-28 md:py-40 lg:py-48">
-          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md hero-anim glow-breath">
+          <h1 className="hero-title max-w-3xl font-brand font-bold text-5xl md:text-7xl lg:text-8xl leading-[0.92] text-left transform-gpu hz-md glow-breath">
             <span className="hero-line hero-line1">Sueño</span>
             <span className="hero-line hero-line2">de Tango</span>
           </h1>
@@ -734,7 +731,7 @@ export default function SuenoDeTangoLanding(){
               ref={imgRef}
               src={IMAGES[lightboxIndex].src}
               alt={IMAGES[lightboxIndex].alt[locale]}
-              className={"lb-img rounded-2xl shadow-2xl ring-1 ring-white/10 transition-transform "+(fitMode==='cover'?'w-full h-full object-cover':'max-w-full max-h-[92dvh] w-auto h-auto object-contain')}
+              className={"lb-img rounded-2xl shadow-2xl ring-1 ring-white/10 transition-transform "+(fitMode==='cover'?"w-full h-full object-cover":"max-w-full max-h-[92dvh] w-auto h-auto object-contain")}
               style={{ transform: dragOffset || dragOffsetY ? (`translate3d(${dragOffset}px, ${dragOffsetY}px, 0)`) : undefined }}
               onLoad={(e)=>{ const img=e.currentTarget; const vw=Math.min(window.innerWidth, Number.MAX_SAFE_INTEGER); const vh=window.innerHeight*0.92; const vp=vw/vh; const ar=(img.naturalWidth||1)/(img.naturalHeight||1); setFitMode(chooseFitMode(ar,vp)); }}
               onDoubleClick={()=> setFitMode(m=>m==='contain'?'cover':'contain')}
