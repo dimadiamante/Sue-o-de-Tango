@@ -434,18 +434,35 @@ export default function SuenoDeTangoLanding(){
     }
   },[]);
 
-  // Override styles: slogan no glow; title breathing glow
+  // Override styles: slogan no glow; title breathing glow (with diagnostics & fallback)
   useEffect(()=>{
     if (document.getElementById('hero-override-style')) return;
     const s = document.createElement('style');
     s.id = 'hero-override-style';
     s.textContent = `
 .hero-slogan{animation:none !important;text-shadow:none !important;-webkit-text-stroke:0 !important;color:#fff !important;font-weight:700 !important;}
-.hero-title{--g1:rgba(255,255,255,.25);--g2:rgba(255,255,255,.6);--g3:rgba(255,255,255,.85);text-shadow:0 0 .25rem var(--g1),0 0 .9rem var(--g2),0 0 1.8rem var(--g1);} 
-.hero-title.glow-breath{animation:glow-breath 3.4s ease-in-out infinite;}
-@keyframes glow-breath{0%,100%{text-shadow:0 0 .2rem var(--g1),0 0 1.0rem var(--g2),0 0 2.0rem var(--g2);}50%{text-shadow:0 0 .35rem var(--g2),0 0 1.5rem var(--g3),0 0 2.6rem rgba(255,255,255,.95);}}
+.hero-title{--g1:rgba(255,255,255,.25);--g2:rgba(255,255,255,.6);--g3:rgba(255,255,255,.9);text-shadow:0 0 .25rem var(--g1),0 0 .9rem var(--g2),0 0 1.8rem var(--g1);will-change:text-shadow,filter}
+.hero-title.glow-breath{animation:glow-breath 3.4s ease-in-out infinite !important}
+@keyframes glow-breath{0%,100%{text-shadow:0 0 .2rem var(--g1),0 0 1.0rem var(--g2),0 0 2.0rem var(--g2);filter:drop-shadow(0 0 .2rem var(--g1)) drop-shadow(0 0 1.0rem var(--g2))}50%{text-shadow:0 0 .35rem var(--g2),0 0 1.5rem var(--g3),0 0 2.6rem rgba(255,255,255,.95);filter:drop-shadow(0 0 .35rem var(--g2)) drop-shadow(0 0 1.5rem var(--g3))}}
 `;
     document.head.appendChild(s);
+
+    // Diagnostics & resilient fallback
+    try{
+      const el = document.querySelector('.hero-title') as HTMLElement | null;
+      if (el){
+        const check = () => {
+          const cs = getComputedStyle(el);
+          console.log('[HERO] animationName:', cs.animationName, 'duration:', cs.animationDuration, 'textShadow:', cs.textShadow);
+          if (!cs.animationName || cs.animationName === 'none'){
+            el.style.animation = 'glow-breath 3.4s ease-in-out infinite';
+            console.warn('[HERO] Applied inline animation fallback');
+          }
+        };
+        requestAnimationFrame(check);
+      }
+    }catch{}
+
     return ()=>{ try{ s.remove(); }catch{} };
   },[]);
 
