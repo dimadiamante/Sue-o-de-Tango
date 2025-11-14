@@ -282,6 +282,13 @@ function runSanityChecks(){
   console.log('[SANITY] OK'); end();
 
   end=group('I18N core fields present'); const fieldsOk=(['en','ro','ru'] as Locale[]).every(Lc=>!!I18N[Lc]?.hero?.title && !!I18N[Lc]?.hero?.slogan); !fieldsOk?console.error('[SANITY] Missing core i18n fields'):console.log('[SANITY] OK'); end();
+
+  // Extra: Schedule keys exist in i18n
+  end=group('Schedule keys exist');
+  const keysOk = (['en','ro','ru'] as Locale[]).every(Lc =>
+    SCHEDULE.every(s => (I18N[Lc].schedule.titles as any)[s.titleKey] && (I18N[Lc].schedule.levels as any)[s.levelKey] && (I18N[Lc].schedule.rooms as any)[s.roomKey])
+  );
+  !keysOk?console.error('[SANITY] Missing schedule keys in i18n') : console.log('[SANITY] OK'); end();
 }
 
 // -----------------------------
@@ -342,7 +349,7 @@ async function sendFormData(obj: Record<string, FormDataEntryValue>, loc: Locale
     const ctrl = new AbortController();
     const t = setTimeout(()=>ctrl.abort(), 12000);
     try{
-      const res = await fetch(`https://formspree.io/f/${id}?nocache=${Date.now()}` , {
+      const res = await fetch(`https://formspree.io/f/${id}?nocache=${Date.now()}`, {
         method:'POST',
         body: fd,
         headers: { 'Accept':'application/json' },
