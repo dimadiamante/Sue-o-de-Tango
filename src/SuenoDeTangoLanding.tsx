@@ -201,14 +201,12 @@ function useHoverSounds(){
     if (document.getElementById('hero-override-style')) return;
     const s = document.createElement('style');
     s.id = 'hero-override-style';
-    s.textContent = 
-      ".hero-slogan{animation:none !important;text-shadow:none !important;-webkit-text-stroke:0 !important;color:#fff !important;font-weight:700 !important;}
-"+
-      ".hero-title{--g1:rgba(255,255,255,.25);--g2:rgba(255,255,255,.6);--g3:rgba(255,255,255,.85);text-shadow:0 0 .25rem var(--g1),0 0 .9rem var(--g2),0 0 1.8rem var(--g1);}
-"+
-      ".hero-title.glow-breath{animation:glow-breath 3.4s ease-in-out infinite;}
-"+
-      "@keyframes glow-breath{0%,100%{text-shadow:0 0 .2rem var(--g1),0 0 1.0rem var(--g2),0 0 2.0rem var(--g2);}50%{text-shadow:0 0 .35rem var(--g2),0 0 1.5rem var(--g3),0 0 2.6rem rgba(255,255,255,.95);}}";
+    s.textContent = `
+.hero-slogan{animation:none !important;text-shadow:none !important;-webkit-text-stroke:0 !important;color:#fff !important;font-weight:700 !important;}
+.hero-title{--g1:rgba(255,255,255,.25);--g2:rgba(255,255,255,.6);--g3:rgba(255,255,255,.85);text-shadow:0 0 .25rem var(--g1),0 0 .9rem var(--g2),0 0 1.8rem var(--g1);} 
+.hero-title.glow-breath{animation:glow-breath 3.4s ease-in-out infinite;}
+@keyframes glow-breath{0%,100%{text-shadow:0 0 .2rem var(--g1),0 0 1.0rem var(--g2),0 0 2.0rem var(--g2);}50%{text-shadow:0 0 .35rem var(--g2),0 0 1.5rem var(--g3),0 0 2.6rem rgba(255,255,255,.95);}}
+`;
     document.head.appendChild(s);
     return ()=>{ try{ s.remove(); }catch{} };
   },[]);
@@ -227,6 +225,228 @@ function useHoverSounds(){
   },[]);
 
   useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
+}
+
+// -----------------------------
+// Gallery
+// -----------------------------
+
+const GALLERY_FILES = ['gallery-01.webp','gallery-02.webp','gallery-03.webp','gallery-04.webp','gallery-05.webp','gallery-06.webp'];
+const IMG_SRC = GALLERY_FILES.map(f => BASE_URL + 'images/' + f);
+const ALT = {
+  en:['Silhouette couple in dramatic light','Close-up tango steps','Abrazo in backlight','Pivot with torso twist','Couple on an empty stage','Dancers\' shoes details'],
+  ro:['Siluetă de cuplu în lumină dramatică','Prim-plan pași de tango','Abrazo în contralumină','Pivot cu răsucire a trunchiului','Cuplu pe o scenă goală','Detalii de încălțăminte'],
+  ru:['Силуэт пары в драматичном свете','Крупный план шагов танго','Абразо на контровом свете','Пивот с разворотом корпуса','Пара на пустой сцене','Детали танцевальной обуви']
+};
+const IMAGES = IMG_SRC.map((src,i)=>({src,alt:{en:ALT.en[i],ro:ALT.ro[i],ru:ALT.ru[i]}}));
+
+// -----------------------------
+// Helpers & sanity tests
+// -----------------------------
+
+function wrapIndex(len:number,index:number,delta:number){return (index+delta+len)%len}
+
+function chooseFitMode(imgAR:number, vpAR:number): 'contain' | 'cover' {
+  // Prefer cover when aspect ratios are close to maximize screen usage, contain otherwise to avoid heavy cropping
+  const diff = Math.abs(imgAR - vpAR) / vpAR;
+  return diff <= 0.18 ? 'cover' : 'contain';
+}
+
+function runSanityChecks(){
+  const group=(name:string)=>{try{console.groupCollapsed?.(`[SANITY] ${name}`)}catch{};return()=>{try{console.groupEnd?.()}catch{}}};
+  const LOCALES = Object.keys(I18N) as Locale[];
+
+  let end=group('DAYS length = 7 for all locales'); const badDays=Object.entries(DAYS).filter(([,a])=>a.length!==7); badDays.length?console.error('[SANITY] DAYS invalid',badDays):console.log('[SANITY] OK'); end();
+
+  end=group('wrapIndex boundaries'); const L=IMAGES.length,t1=wrapIndex(L,0,-1)===L-1,t2=wrapIndex(L,L-1,1)===0,t3=wrapIndex(L,2,-3)===L-1; !(t1&&t2&&t3)?console.error('[SANITY] wrapIndex failed',{t1,t2,t3,L}):console.log('[SANITY] OK'); end();
+
+  end=group('Images alt per locale'); const miss: Array<{idx:number;missing:Locale[]}> = []; IMAGES.forEach((img,i)=>{const m:Locale[]=[]; LOCALES.forEach(Lc=>{if(!img.alt[Lc])m.push(Lc)}); if(m.length)miss.push({idx:i,missing:m})}); miss.length?console.error('[SANITY] Missing alts',miss):console.log('[SANITY] OK'); end();
+
+  end=group('Gallery file extensions are .webp'); const wrongExt=GALLERY_FILES.filter(f=>!f.endsWith('.webp')); wrongExt.length?console.error('[SANITY] Non-webp images',wrongExt):console.log('[SANITY] OK'); end();
+
+  end=group('Hero assets are .webp'); const heroOk=HERO_BANNER.endsWith('.webp')&&FALLBACK_HERO.endsWith('.webp'); !heroOk?console.error('[SANITY] Hero not webp'):
+  console.log('[SANITY] OK'); end();
+
+  end=group('I18N core fields present'); const fieldsOk=(['en','ro','ru'] as Locale[]).every(Lc=>!!I18N[Lc]?.hero?.title && !!I18N[Lc]?.hero?.slogan); !fieldsOk?console.error('[SANITY] Missing core i18n fields'):console.log('[SANITY] OK'); end();
+}
+
+// -----------------------------
+// Schedule (Monday‑first UI)
+// -----------------------------
+
+type ScheduleItem = { dayIndex:number; time:string; titleKey:TitleKey; levelKey:LevelKey; teacher:string; roomKey:RoomKey };
+const SCHEDULE: ScheduleItem[] = [
+  { dayIndex:1,time:'18:30–19:30',titleKey:'basicCourse',levelKey:'beginners',teacher:'Anna & Mark',roomKey:'roomA' },
+  { dayIndex:1,time:'19:45–21:00',titleKey:'musicalityImprovisation',levelKey:'improvers',teacher:'Anna & Mark',roomKey:'roomA' },
+  { dayIndex:2,time:'19:00–20:15',titleKey:'techniqueAxisPivots',levelKey:'allLevels',teacher:'Irina',roomKey:'roomB' },
+  { dayIndex:3,time:'19:00–20:15',titleKey:'partnerWorkAbrazo',levelKey:'mixedBegImp',teacher:'Anna',roomKey:'roomB' },
+  { dayIndex:4,time:'19:30–20:45',titleKey:'tangoVals',levelKey:'intermediatePlus',teacher:'Mark',roomKey:'roomA' },
+  { dayIndex:5,time:'20:30–23:30',titleKey:'practicaMilonga',levelKey:'open',teacher:'DJ Hernán',roomKey:'mainHall' },
+  { dayIndex:6,time:'12:00–13:30',titleKey:'intensiveVals',levelKey:'intermediatePlus',teacher:'Anna & Mark',roomKey:'roomA' },
+  { dayIndex:0,time:'12:00–13:00',titleKey:'bootcampFromScratch',levelKey:'beginners',teacher:'Irina',roomKey:'roomA' }
+];
+const WEEK_ORDER = [1,2,3,4,5,6,0];
+
+// -----------------------------
+// Form sending
+// -----------------------------
+
+const FORM_MODE: 'auto' | 'formspree' | 'mailto' = 'formspree';
+
+function getFormspreeId(): string | null {
+  try{
+    const m = document.querySelector('meta[name="formspree-id"]') as HTMLMetaElement | null;
+    if (m && m.content) return m.content.trim();
+    // optional global hook for quick tests
+    const win: any = window as any;
+    if (win && typeof win.FORMSPREE_ID === 'string') return win.FORMSPREE_ID;
+  }catch{}
+  return null;
+}
+
+function sendMailto(obj: Record<string, FormDataEntryValue>, loc: Locale){
+  const subject = encodeURIComponent('New request — Sueño de Tango');
+  const lines: string[] = [];
+  for (const [k,v] of Object.entries(obj)) lines.push(`${k}: ${String(v)}`);
+  lines.push(`locale: ${loc}`);
+  const body = encodeURIComponent(lines.join('
+'));
+  const href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+  window.location.href = href;
+}
+
+async function sendFormData(obj: Record<string, FormDataEntryValue>, loc: Locale): Promise<void>{
+  const id = getFormspreeId();
+  const useFs = (FORM_MODE==='formspree') || (FORM_MODE==='auto' && !!id);
+  if (useFs && id){
+    const fd = new FormData();
+    for (const [k,v] of Object.entries(obj)) fd.append(k, String(v));
+    fd.append('_subject','New request — Sueño de Tango');
+    fd.append('_replyto', String(obj.email || CONTACT_EMAIL));
+    fd.append('_locale', loc);
+
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 12000);
+    try{
+      const res = await fetch(`https://formspree.io/f/${id}?nocache=${Date.now()}` , {
+        method:'POST',
+        body: fd,
+        headers: { 'Accept':'application/json' },
+        signal: ctrl.signal,
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      clearTimeout(t);
+      if (res.ok) return;
+      console.warn('[Form] Formspree non-OK status', res.status);
+      // fallback to mailto if blocked or non-OK
+      sendMailto(obj, loc);
+      return;
+    }catch(err){
+      console.warn('[Form] Formspree fetch failed', err);
+      sendMailto(obj, loc);
+      return;
+    }
+  }
+  // Mailto path
+  sendMailto(obj, loc);
+}
+
+// -----------------------------
+// Component
+// -----------------------------
+
+export default function SuenoDeTangoLanding(){
+  const [menuOpen,setMenuOpen]=useState(false);
+  const [lightboxIndex,setLightboxIndex]=useState<number|null>(null);
+  const [fitMode,setFitMode]=useState<'contain'|'cover'>('contain');
+  const [locale,setLocale]=useState<Locale>(()=>{if(typeof window==='undefined')return 'ro'; const s=window.localStorage.getItem('tango_locale') as Locale|null; return (s&&(['en','ro','ru'] as Locale[]).includes(s))?s:'ro'});
+  const [submitting,setSubmitting]=useState(false);
+  const t=I18N[locale];
+  const todayIndex=new Date().getDay();
+  const [activeDay,setActiveDay]=useState<number>(todayIndex);
+  const imgRef = useRef<HTMLImageElement|null>(null);
+  // Swipe navigation (mobile/lightbox)
+  const SWIPE_THRESH = 60; // px to trigger slide left/right
+  const SWIPE_CLOSE = 90;  // px to close by vertical swipe
+  const VERT_LOCK = 24; // px vertical movement cancels horizontal intent
+  const startX = useRef<number|null>(null);
+  const startY = useRef<number|null>(null);
+  const dragging = useRef(false);
+  const [dragOffset, setDragOffset] = useState(0);     // X translate for slide feedback
+  const [dragOffsetY, setDragOffsetY] = useState(0);   // Y translate for close feedback
+  const offsetXRef = useRef(0);
+  const offsetYRef = useRef(0);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+    dragging.current = true;
+    setDragOffset(0);
+    setDragOffsetY(0);
+    offsetXRef.current = 0;
+    offsetYRef.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!dragging.current || startX.current == null || startY.current == null) return;
+    const dx = e.touches[0].clientX - startX.current;
+    const dy = e.touches[0].clientY - startY.current;
+    offsetXRef.current = dx; offsetYRef.current = dy;
+    const absX = Math.abs(dx), absY = Math.abs(dy);
+    // Prevent page scroll while interacting with lightbox
+    e.preventDefault();
+    if (absY > absX && absY > VERT_LOCK) { // vertical gesture dominates
+      setDragOffset(0);
+      setDragOffsetY(dy);
+    } else { // horizontal gesture
+      setDragOffset(dx);
+      setDragOffsetY(0);
+    }
+  };
+  const onTouchEnd = () => {
+    if (!dragging.current) return;
+    dragging.current = false;
+    const dx = offsetXRef.current;
+    const dy = offsetYRef.current;
+    setDragOffset(0);
+    setDragOffsetY(0);
+    if (Math.abs(dx) > SWIPE_THRESH && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) nextImage(); else prevImage();
+      return;
+    }
+    if (Math.abs(dy) > SWIPE_CLOSE && Math.abs(dy) > Math.abs(dx)) {
+      closeLightbox();
+      return;
+    }
+  };
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.buttons !== 1) return;
+    startX.current = e.clientX; startY.current = e.clientY; dragging.current = true; setDragOffset(0); setDragOffsetY(0);
+    offsetXRef.current = 0; offsetYRef.current = 0;
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragging.current || startX.current == null || startY.current == null) return;
+    const dx = e.clientX - startX.current; const dy = e.clientY - startY.current;
+    offsetXRef.current = dx; offsetYRef.current = dy;
+    const absX = Math.abs(dx), absY = Math.abs(dy);
+    if (absY > absX && absY > VERT_LOCK) { // treat as vertical drag feedback
+      setDragOffset(0); setDragOffsetY(dy);
+    } else {
+      setDragOffset(dx); setDragOffsetY(0);
+    }
+    e.preventDefault();
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (!dragging.current) return; (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); onTouchEnd();
+  };
+
+  useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
+  useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
+  useHoverSounds();
+
+  // Google Fonts + App CSS + Preload hero (guarded) handled in useHoverSounds()
 
   const openLightbox=useCallback((i:number)=>{setLightboxIndex(i)},[]);
   const closeLightbox=useCallback(()=>{setLightboxIndex(null)},[]);
