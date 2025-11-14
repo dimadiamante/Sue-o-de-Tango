@@ -178,6 +178,7 @@ function playHover(freq=920){
   }catch{}
 }
 function useHoverSounds(){
+  // Inject Google Fonts + app CSS + preload hero (guarded)
   useEffect(()=>{
     if (!document.querySelector('link[data-gf]')) {
       const pre1 = document.createElement('link'); pre1.rel='preconnect'; pre1.href='https://fonts.googleapis.com'; pre1.setAttribute('data-gf',''); document.head.appendChild(pre1);
@@ -196,7 +197,7 @@ function useHoverSounds(){
     }
   },[]);
 
-  // Strong override to ensure the slogan has NO glow/animation and title keeps breathing glow
+  // Override styles: slogan no glow; title breathing glow
   useEffect(()=>{
     if (document.getElementById('hero-override-style')) return;
     const s = document.createElement('style');
@@ -211,7 +212,7 @@ function useHoverSounds(){
     return ()=>{ try{ s.remove(); }catch{} };
   },[]);
 
-  // Favicons (local files, no external links)
+  // Favicons (local files)
   useEffect(()=>{
     if (document.querySelector('link[data-local-favicon]')) return;
     const add = (rel:string, href:string, attrs?:Record<string,string>)=>{
@@ -224,7 +225,20 @@ function useHoverSounds(){
     add('apple-touch-icon', base + 'apple-touch-icon.png', { sizes:'180x180' });
   },[]);
 
-  useEffect(()=>{console.log('[SANITY] running'); runSanityChecks()},[]);
+  // Hover sound listener
+  useEffect(()=>{
+    const onEnter = (e: MouseEvent) => {
+      const el = e.target as EventTarget | null;
+      if (!el || !(el instanceof Element)) return;
+      const target = el.closest('[data-snd="hover"]');
+      if (target) playHover();
+    };
+    document.addEventListener('mouseenter', onEnter, true);
+    return ()=> document.removeEventListener('mouseenter', onEnter, true);
+  },[]);
+
+  // Sanity logs
+  useEffect(()=>{ try{ console.log('[SANITY] running'); runSanityChecks(); }catch{} },[]);
 }
 
 // -----------------------------
@@ -445,8 +459,6 @@ export default function SuenoDeTangoLanding(){
   useEffect(()=>{try{window.localStorage.setItem('tango_locale',locale)}catch{}},[locale]);
   useEffect(()=>{ try{ document.documentElement.lang = locale; }catch{} }, [locale]);
   useHoverSounds();
-
-  // Google Fonts + App CSS + Preload hero (guarded) handled in useHoverSounds()
 
   const openLightbox=useCallback((i:number)=>{setLightboxIndex(i)},[]);
   const closeLightbox=useCallback(()=>{setLightboxIndex(null)},[]);
