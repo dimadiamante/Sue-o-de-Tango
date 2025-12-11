@@ -136,8 +136,8 @@ const MAPS_URL = 'https://maps.app.goo.gl/Xe1dM73d6raCRfNU7';
 
 // Contact
 const CONTACT_EMAIL = 'info@sueno-de-tango.org';
-const CONTACT_PHONE = '+40 728 717 412';
-const CONTACT_PHONE_TEL = '+40728717412';
+const CONTACT_PHONE = '+40 767 588 051';
+const CONTACT_PHONE_TEL = '+40767588051';
 
 // -----------------------------
 // Hover sounds (WebAudio, no assets)
